@@ -1,0 +1,109 @@
+# ============================================================================
+# ML-Homicidios - Requirements
+# Proyecto de Machine Learning para predicción de tasas de homicidios
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# Core Dependencies
+# ----------------------------------------------------------------------------
+python-dotenv>=1.0.0          # Gestión de variables de entorno
+pydantic>=2.0.0               # Validación de configuración y datos
+pydantic-settings>=2.0.0      # Settings management con Pydantic
+
+# ----------------------------------------------------------------------------
+# API & Data Ingestion
+# ----------------------------------------------------------------------------
+requests>=2.31.0              # HTTP requests para APIs
+sodapy>=1.8.0                 # Cliente para Socrata Open Data API (Datos Abiertos)
+urllib3>=2.0.0                # HTTP client (dependencia de requests)
+python-crontab>=3.0.0         # Gestión programática de cron jobs
+
+# ----------------------------------------------------------------------------
+# Data Processing & Analysis
+# ----------------------------------------------------------------------------
+pandas>=2.1.0                 # Manipulación y análisis de datos
+polars>=0.19.0                # DataFrames de alto rendimiento (alternativa a pandas)
+numpy>=1.24.0                 # Operaciones numéricas
+pyarrow>=14.0.0               # Lectura/escritura de archivos Parquet
+fastparquet>=2023.10.0        # Alternativa para Parquet (backup)
+
+# ----------------------------------------------------------------------------
+# Database & Storage
+# ----------------------------------------------------------------------------
+sqlalchemy>=2.0.0             # ORM para bases de datos
+psycopg2-binary>=2.9.0        # PostgreSQL adapter (si usas PostgreSQL)
+mysql-connector-python>=8.2.0 # MySQL connector (si usas MySQL)
+
+# ----------------------------------------------------------------------------
+# Machine Learning - Core
+# ----------------------------------------------------------------------------
+scikit-learn>=1.3.0           # Algoritmos de ML, preprocessing, métricas
+xgboost>=2.0.0                # Gradient Boosting optimizado
+lightgbm>=4.1.0               # Light Gradient Boosting Machine
+catboost>=1.2.0               # CatBoost (opcional, excelente para datos categóricos)
+
+# ----------------------------------------------------------------------------
+# Machine Learning - Time Series & Forecasting
+# ----------------------------------------------------------------------------
+prophet>=1.1.5                # Forecasting de series temporales (Facebook Prophet)
+statsmodels>=0.14.0           # Modelos estadísticos y análisis de series temporales
+empiricaldist>=0.7.0          # Distribuciones empíricas
+
+# ----------------------------------------------------------------------------
+# Model Management & Experiment Tracking
+# ----------------------------------------------------------------------------
+joblib>=1.3.0                 # Serialización de modelos
+mlflow>=2.8.0                 # Tracking de experimentos y versionado de modelos (opcional)
+
+# ----------------------------------------------------------------------------
+# Visualization & Dashboard
+# ----------------------------------------------------------------------------
+streamlit>=1.28.0             # Framework para dashboard web
+plotly>=5.17.0                # Gráficos interactivos
+matplotlib>=3.8.0             # Gráficos estáticos
+seaborn>=0.13.0               # Visualizaciones estadísticas
+folium>=0.15.0                # Mapas interactivos de Colombia
+geopandas>=0.14.0             # Datos geoespaciales (para mapas por departamento/municipio)
+
+# ----------------------------------------------------------------------------
+# Data Validation & Quality
+# ----------------------------------------------------------------------------
+great-expectations>=0.18.0    # Validación de calidad de datos (opcional pero recomendado)
+pandera>=0.17.0               # Validación de schemas de DataFrames
+
+# ----------------------------------------------------------------------------
+# Logging & Monitoring
+# ----------------------------------------------------------------------------
+loguru>=0.7.0                 # Logging mejorado (alternativa a logging estándar)
+python-json-logger>=2.0.0     # JSON logging para producción
+
+# ----------------------------------------------------------------------------
+# Testing
+# ----------------------------------------------------------------------------
+pytest>=7.4.0                 # Framework de testing
+pytest-cov>=4.1.0             # Cobertura de tests
+pytest-mock>=3.12.0           # Mocking para tests
+responses>=0.24.0             # Mock de HTTP requests
+faker>=20.0.0                 # Generación de datos fake para tests
+
+# ----------------------------------------------------------------------------
+# Code Quality & Formatting
+# ----------------------------------------------------------------------------
+black>=23.11.0                # Formateo de código
+flake8>=6.1.0                 # Linting
+isort>=5.12.0                 # Ordenamiento de imports
+mypy>=1.7.0                   # Type checking
+
+# ----------------------------------------------------------------------------
+# Utilities
+# ----------------------------------------------------------------------------
+python-dateutil>=2.8.0        # Utilidades para manejo de fechas
+tqdm>=4.66.0                  # Progress bars
+click>=8.1.0                  # CLI interface (para scripts de línea de comandos)
+rich>=13.7.0                  # Pretty printing en terminal
+
+# ----------------------------------------------------------------------------
+# Docker & Deployment
+# ----------------------------------------------------------------------------
+gunicorn>=21.2.0              # WSGI server para producción (si se necesita)
+uvicorn>=0.24.0               # ASGI server (alternativa moderna)
