@@ -17,7 +17,12 @@ ML-Homicidios es un sistema completo de Machine Learning containerizado que pred
 - 📍 **Zona**
 - 🏘️ **Tipo de Municipio**
 
-El sistema extrae automáticamente datos de la **API de Datos Abiertos de Colombia**, los procesa a través de un pipeline ETL hacia un Data Lake y Data Warehouse, entrena modelos de ML, y sirve predicciones a través de un dashboard interactivo de Streamlit.
+El sistema integra **tres fuentes de datos oficiales**:
+1. **Homicidios**: Datos de homicidios de Datos Abiertos Colombia
+2. **DIVIPOLA Departamentos**: División Político-Administrativa - Departamentos (DANE)
+3. **DIVIPOLA Municipios**: División Político-Administrativa - Municipios (DANE)
+
+Extrae automáticamente datos de la **API de Datos Abiertos de Colombia**, los procesa a través de un pipeline ETL hacia un Data Lake y Data Warehouse, entrena modelos de ML, y sirve predicciones a través de un dashboard interactivo de Streamlit.
 
 ---
 
@@ -26,44 +31,6 @@ El sistema extrae automáticamente datos de la **API de Datos Abiertos de Colomb
 1. **Aprendizaje**: Desarrollar habilidades en ingeniería de datos y ML en producción
 2. **Predicción**: Generar predicciones precisas de tasas de homicidios
 3. **Visualización**: Proporcionar insights accionables a través de dashboards interactivos
-4. **Automatización**: Pipeline completamente automatizado con cron jobs
-
----
-
-## 🏗️ Arquitectura
-
-```mermaid
-graph TB
-    subgraph "Capa de Ingesta"
-        A[API Datos Abiertos] -->|Cron Diario| B[Extractor de Datos]
-        B --> C[Data Lake - Raw]
-    end
-    
-    subgraph "Capa de Procesamiento"
-        C --> D[Pipeline ETL]
-        D --> E[Data Warehouse]
-    end
-    
-    subgraph "Capa de ML"
-        E --> F[Feature Engineering]
-        F --> G[Entrenamiento]
-        G --> H[Modelos Entrenados]
-    end
-    
-    subgraph "Capa de Aplicación"
-        H --> I[Dashboard Streamlit]
-        E --> I
-        I --> J[Streamlit Cloud]
-    end
-    
-    style A fill:#e1f5ff
-    style J fill:#ffe1f5
-```
-
----
-
-## 🛠️ Stack Tecnológico
-
 ### Core
 - **Python 3.11+**: Lenguaje principal
 - **Docker & Docker Compose**: Containerización
@@ -122,6 +89,149 @@ ML-Homicidios/
 
 ---
 
+## 📊 Fuentes de Datos
+
+El proyecto integra **tres datasets oficiales** de Datos Abiertos Colombia:
+
+### 1. 🔴 Dataset de Homicidios
+
+**Propósito**: Datos históricos de homicidios en Colombia
+
+**Información incluida**:
+- Fecha del homicidio
+- Ubicación (departamento, municipio, zona)
+- Tipo de arma
+- Circunstancias
+- Datos demográficos de la víctima
+
+**Uso en el proyecto**: Dataset principal para entrenamiento de modelos predictivos
+
+### 2. 🗺️ DIVIPOLA Departamentos
+
+**Propósito**: División Político-Administrativa oficial de Colombia (DANE)
+
+**Información incluida**:
+- Código DANE del departamento (2 dígitos)
+- Nombre oficial del departamento
+- Región geográfica
+- Capital del departamento
+
+**Uso en el proyecto**: 
+- Estandarización de nombres de departamentos
+- Joins precisos con datos de homicidios
+- Agregaciones por región
+- Visualizaciones geográficas
+
+### 3. 🏘️ DIVIPOLA Municipios
+
+**Propósito**: Catálogo oficial de municipios de Colombia (DANE)
+
+**Información incluida**:
+- Código DANE del municipio (5 dígitos)
+- Nombre oficial del municipio
+- Código del departamento al que pertenece
+- Categoría del municipio (especial, 1, 2, 3, 4, 5, 6)
+- Tipo (urbano, rural)
+- Población estimada
+
+**Uso en el proyecto**:
+- Estandarización de nombres de municipios
+- Clasificación por tipo y categoría de municipio
+- Features adicionales (población, categoría)
+- Predicciones granulares a nivel municipal
+
+### 🔗 Integración de Datasets
+
+```mermaid
+graph LR
+    A[Homicidios] -->|JOIN por código DANE| B[DIVIPOLA Municipios]
+    B -->|JOIN por código depto| C[DIVIPOLA Departamentos]
+    C --> D[Dataset Enriquecido]
+    D --> E[Feature Engineering]
+    E --> F[Modelos ML]
+```
+
+**Beneficios de usar DIVIPOLA**:
+- ✅ **Códigos únicos**: Evita ambigüedades en nombres
+- ✅ **Datos oficiales**: Información validada por el DANE
+- ✅ **Features adicionales**: Población, categoría, tipo de municipio
+- ✅ **Joins precisos**: Relaciones uno-a-uno garantizadas
+
+---
+
+## 🗄️ Data Lake y Data Warehouse
+
+### Data Lake - Almacenamiento Crudo
+
+**Propósito**: Almacenar datos crudos con transformaciones mínimas
+
+**Ubicación**: `./data/raw/`
+
+**Formato**: Parquet (columnar, eficiente)
+
+**Contenido**:
+- Datos de homicidios con ID único asignado
+- DIVIPOLA departamentos (carga única)
+- DIVIPOLA municipios (carga única)
+
+**Transformaciones**:
+- ✅ Asignación de ID único (`homicidio_id`)
+- ✅ Conversión a Parquet
+- ❌ Sin limpieza de datos
+- ❌ Sin joins o agregaciones
+
+### Data Warehouse - Modelo Estrella
+
+**Propósito**: Datos procesados y optimizados para análisis
+
+**Ubicación**: `./data/processed/`
+
+**Modelo**: Star Schema (Estrella)
+
+**Tablas**:
+
+#### Tabla de Hechos
+- `fact_homicidios`: Eventos de homicidios con métricas
+
+#### Dimensiones
+- `dim_fecha`: Dimensión temporal (año, mes, día, etc.)
+- `dim_ubicacion`: Geografía enriquecida con DIVIPOLA
+- `dim_victima`: Características demográficas
+- `dim_arma`: Tipo de arma utilizada
+
+**Documentación completa**: Ver [docs/star_schema.md](docs/star_schema.md)
+
+### Pipeline ETL
+
+```mermaid
+sequenceDiagram
+    participant API as API Datos Abiertos
+    participant Lake as Data Lake
+    participant ETL as Proceso ETL
+    participant DW as Data Warehouse
+    participant ML as Modelos ML
+    
+    Note over API,Lake: Carga Inicial (Una vez)
+    API->>Lake: Full load de homicidios
+    API->>Lake: DIVIPOLA departamentos
+    API->>Lake: DIVIPOLA municipios
+    
+    Note over API,Lake: Carga Incremental (Viernes)
+    API->>Lake: Solo registros nuevos
+    
+    Note over Lake,DW: ETL Diario
+    Lake->>ETL: Leer datos crudos
+    ETL->>ETL: JOIN con DIVIPOLA
+    ETL->>ETL: Crear dimensiones
+    ETL->>DW: Cargar modelo estrella
+    
+    Note over DW,ML: Análisis y ML
+    DW->>ML: Features para modelos
+    ML->>ML: Entrenamiento
+```
+
+---
+
 ## 🚀 Instalación y Configuración
 
 ### Prerrequisitos
@@ -169,25 +279,54 @@ nano .env
 
 **Variables requeridas en `.env`:**
 ```env
-# API Datos Abiertos
-DATOS_ABIERTOS_API_KEY=tu_api_key_aqui
-DATOS_ABIERTOS_DATASET_ID=dataset_id_aqui
+# ============================================================================
+# Datasets de Datos Abiertos Colombia
+# ============================================================================
 
-# Database (opcional)
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=homicidios_db
-DB_USER=usuario
-DB_PASSWORD=contraseña
+# 1. Dataset de Homicidios
+DATOS_ABIERTOS_HOMICIDIOS_ID=tu_dataset_id_homicidios
 
-# Paths
-DATA_RAW_PATH=./data/raw
-DATA_PROCESSED_PATH=./data/processed
-MODELS_PATH=./data/models
+# 2. DIVIPOLA Departamentos
+DATOS_ABIERTOS_DIVIPOLA_DEPARTAMENTOS_ID=tu_dataset_id_departamentos
 
+# 3. DIVIPOLA Municipios
+DATOS_ABIERTOS_DIVIPOLA_MUNICIPIOS_ID=tu_dataset_id_municipios
+
+# API Key (OPCIONAL - dejar vacío para API pública)
+DATOS_ABIERTOS_API_KEY=
+
+# ============================================================================
+# Base de Datos (SQLite por defecto para desarrollo)
+# ============================================================================
+DB_TYPE=sqlite
+DB_PATH=./data/homicidios.db
+
+# ============================================================================
+# Configuración de Modelos
+# ============================================================================
+DEFAULT_MODEL=xgboost
+MODEL_N_ESTIMATORS=100
+MODEL_MAX_DEPTH=6
+MODEL_LEARNING_RATE=0.1
+
+# ============================================================================
 # Logging
+# ============================================================================
 LOG_LEVEL=INFO
+LOG_FILE=./logs/ml_homicidios.log
+
+# ============================================================================
+# Ambiente
+# ============================================================================
+ENVIRONMENT=development
+DEBUG=True
 ```
+
+**📝 Nota**: Para encontrar los IDs de los datasets:
+1. Ve a https://www.datos.gov.co
+2. Busca cada dataset (homicidios, divipola departamentos, divipola municipios)
+3. El ID está en la URL o en la sección "API" del dataset
+4. Ejemplo de ID: `abcd-1234`
 
 ---
 

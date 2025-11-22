@@ -1,0 +1,113 @@
+version: '3.8'
+
+services:
+  # ============================================================================
+  # Data Lake - PostgreSQL
+  # Base de datos para almacenar datos crudos con mínimas transformaciones
+  # ============================================================================
+  datalake:
+    image: postgres:15-alpine
+    container_name: ml-homicidios-datalake
+    restart: unless-stopped
+
+    # Port mapping para acceso desde localhost (desarrollo/testing)
+    # Para producción, comentar estas líneas y usar solo red Docker
+    ports:
+      - "5433:5432"
+
+    environment:
+      # Credenciales de la base de datos
+      POSTGRES_USER: ${DATALAKE_USER:-datalake_user}
+      POSTGRES_PASSWORD: ${DATALAKE_PASSWORD:-datalake_password}
+      POSTGRES_DB: ${DATALAKE_DB:-homicidios_datalake}
+
+      # Configuración de PostgreSQL
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=es_CO.UTF-8"
+
+    volumes:
+      # Persistencia de datos
+      - datalake_data:/var/lib/postgresql/data
+
+      # Scripts de inicialización
+      - ./docker/init-scripts/01-create-datalake-schema.sql:/docker-entrypoint-initdb.d/01-create-schema.sql
+
+    networks:
+      - ml-homicidios-network
+
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DATALAKE_USER:-datalake_user}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============================================================================
+  # Data Warehouse - PostgreSQL
+  # Base de datos para el modelo estrella (fact + dimensions)
+  # ============================================================================
+  datawarehouse:
+    image: postgres:15-alpine
+    container_name: ml-homicidios-datawarehouse
+    restart: unless-stopped
+
+    # NO exponemos puertos al host
+    # Solo accesible desde otros contenedores en la red Docker
+    # ports:
+    #   - "5434:5432"  # COMENTADO - no exponer al host
+
+    environment:
+      POSTGRES_USER: ${DW_USER:-dw_user}
+      POSTGRES_PASSWORD: ${DW_PASSWORD:-dw_password}
+      POSTGRES_DB: ${DW_DB:-homicidios_dw}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=es_CO.UTF-8"
+
+    volumes:
+      - datawarehouse_data:/var/lib/postgresql/data
+      - ./docker/init-scripts/02-create-datawarehouse-schema.sql:/docker-entrypoint-initdb.d/02-create-schema.sql
+
+    networks:
+      - ml-homicidios-network
+
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DW_USER:-dw_user}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============================================================================
+  # Adminer - Interfaz web ligera para administrar las bases de datos
+  # ============================================================================
+  adminer:
+    image: adminer:latest
+    container_name: ml-homicidios-adminer
+    restart: unless-stopped
+
+    ports:
+      - "8080:8080"
+
+    environment:
+      ADMINER_DEFAULT_SERVER: datalake
+      ADMINER_DESIGN: pepa-linha # Tema moderno
+
+    networks:
+      - ml-homicidios-network
+
+    depends_on:
+      - datalake
+      - datawarehouse
+
+# ==============================================================================
+# Volumes - Persistencia de datos
+# ==============================================================================
+volumes:
+  datalake_data:
+    name: ml-homicidios-datalake-data
+  datawarehouse_data:
+    name: ml-homicidios-datawarehouse-data
+
+# ==============================================================================
+# Networks - Red interna para comunicación entre servicios
+# ==============================================================================
+networks:
+  ml-homicidios-network:
+    name: ml-homicidios-network
+    driver: bridge
