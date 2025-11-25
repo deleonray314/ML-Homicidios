@@ -80,6 +80,13 @@ class Settings(BaseSettings):
         default=Path("./data/homicidios.db"),
         description="Ruta para SQLite"
     )
+    
+    # Data Warehouse Configuration
+    dw_host: str = Field(default="datawarehouse")
+    dw_port: int = Field(default=5432)
+    dw_db: str = Field(default="homicidios_dw")
+    dw_user: str = Field(default="dw_user")
+    dw_password: str = Field(default="dw_password_2024")
 
     # ========================================================================
     # Data Paths

@@ -1,607 +1,380 @@
-# 🔍 ML-Homicidios
+# 📚 Manual Completo - Proyecto ML-Homicidios
 
-**Sistema de Machine Learning para Predicción de Tasas de Homicidios en Colombia**
+## 🎯 Descripción del Proyecto
 
-[![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![Streamlit](https://img.shields.io/badge/Streamlit-1.28+-red.svg)](https://streamlit.io/)
-[![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://www.docker.com/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+Sistema completo de análisis y predicción de homicidios en Colombia, implementando una arquitectura de datos moderna con Data Lake, Data Warehouse (modelo estrella), y pipelines ETL automatizados.
 
 ---
 
-## 📋 Descripción
+## 📖 Índice de Documentación
 
-ML-Homicidios es un sistema completo de Machine Learning containerizado que predice tasas de homicidios en Colombia a nivel de:
-- 🏛️ **Departamento**
-- 🏙️ **Municipio**
-- 📍 **Zona**
-- 🏘️ **Tipo de Municipio**
+### **🗄️ Data Lake**
 
-El sistema integra **tres fuentes de datos oficiales**:
-1. **Homicidios**: Datos de homicidios de Datos Abiertos Colombia
-2. **DIVIPOLA Departamentos**: División Político-Administrativa - Departamentos (DANE)
-3. **DIVIPOLA Municipios**: División Político-Administrativa - Municipios (DANE)
+| Documento | Descripción |
+|-----------|-------------|
+| [DL_ETL_Quickstart.md](DL_ETL_Quickstart.md) | Guía rápida para ejecutar el ETL del Data Lake |
+| [DL_Cron_Usage.md](DL_Cron_Usage.md) | Uso del servicio ETL con cron automático |
+| [DL_Cron_Checklist.md](DL_Cron_Checklist.md) | Checklist de implementación y verificación |
+| [DL_Loading_Strategy.md](DL_Loading_Strategy.md) | Estrategia de carga inicial e incremental |
+| [DL_Migracion_Integer.md](DL_Migracion_Integer.md) | Migración de códigos DIVIPOLA a INTEGER |
 
-Extrae automáticamente datos de la **API de Datos Abiertos de Colombia**, los procesa a través de un pipeline ETL hacia un Data Lake y Data Warehouse, entrena modelos de ML, y sirve predicciones a través de un dashboard interactivo de Streamlit.
+### **🏢 Data Warehouse**
 
----
+| Documento | Descripción |
+|-----------|-------------|
+| [DWH_Modelo_Estrella.md](DWH_Modelo_Estrella.md) | Diagrama ER del modelo estrella |
+| [DWH_Schema_Design.md](DWH_Schema_Design.md) | Diseño detallado del schema |
+| [DWH_ETL_Quickstart.md](DWH_ETL_Quickstart.md) | Guía rápida del ETL DWH |
 
-## 🎯 Objetivos del Proyecto
+### **🐳 Docker & Infraestructura**
 
-1. **Aprendizaje**: Desarrollar habilidades en ingeniería de datos y ML en producción
-2. **Predicción**: Generar predicciones precisas de tasas de homicidios
-3. **Visualización**: Proporcionar insights accionables a través de dashboards interactivos
-### Core
-- **Python 3.11+**: Lenguaje principal
-- **Docker & Docker Compose**: Containerización
-- **Git**: Control de versiones
-
-### Data Pipeline
-- **Requests & Sodapy**: Extracción de datos de APIs
-- **Pandas & Polars**: Manipulación de datos
-- **Parquet**: Almacenamiento eficiente (Data Lake)
-- **Python-Crontab**: Automatización de tareas
-
-### Machine Learning
-- **Scikit-learn**: Algoritmos base y preprocessing
-- **XGBoost & LightGBM**: Gradient boosting
-- **Prophet**: Forecasting de series temporales
-- **MLflow**: Tracking de experimentos (opcional)
-
-### Visualización
-- **Streamlit**: Framework de dashboard
-- **Plotly**: Gráficos interactivos
-- **Folium & GeoPandas**: Mapas de Colombia
-
-### Testing & Quality
-- **Pytest**: Framework de testing
-- **Black, Flake8, Isort**: Code quality
-- **MyPy**: Type checking
+| Documento | Ubicación | Descripción |
+|-----------|-----------|-------------|
+| [QUICKSTART.md](../docker/QUICKSTART.md) | `docker/` | Inicio rápido con Docker |
+| [ADMINER_GUIDE.md](../docker/ADMINER_GUIDE.md) | `docker/` | Guía de uso de Adminer |
+| [NETWORK_ACCESS.md](../docker/NETWORK_ACCESS.md) | `docker/` | Configuración de red |
 
 ---
 
-## 📁 Estructura del Proyecto
+## 🏗️ Arquitectura del Sistema
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    FUENTE DE DATOS                          │
+│              API Datos Abiertos Colombia                    │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+                       │ ETL Semanal (Viernes 23:00)
+                       ▼
+┌─────────────────────────────────────────────────────────────┐
+│                     DATA LAKE                               │
+│              PostgreSQL - Datos Raw                         │
+│  ┌────────────────────────────────────────────────────┐    │
+│  │ raw_homicidios                                     │    │
+│  │ raw_divipola_departamentos                         │    │
+│  │ raw_divipola_municipios                            │    │
+│  └────────────────────────────────────────────────────┘    │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+                       │ ETL Transformación (Sábado 01:00)
+                       ▼
+┌─────────────────────────────────────────────────────────────┐
+│                  DATA WAREHOUSE                             │
+│           PostgreSQL - Modelo Estrella                      │
+│  ┌────────────────────────────────────────────────────┐    │
+│  │ Dimensiones:                                       │    │
+│  │  - dim_fecha (8,340 registros)                     │    │
+│  │  - dim_departamento (33 registros)                 │    │
+│  │  - dim_municipio (1,121 registros)                 │    │
+│  │  - dim_sexo (6 registros)                          │    │
+│  │                                                     │    │
+│  │ Hechos:                                            │    │
+│  │  - fact_homicidios (332,131 registros)             │    │
+│  └────────────────────────────────────────────────────┘    │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+                       │ Análisis & ML
+                       ▼
+┌─────────────────────────────────────────────────────────────┐
+│              CAPA DE ANÁLISIS (Futuro)                      │
+│  - Dashboards (Streamlit/PowerBI)                          │
+│  - Modelos ML (XGBoost, LightGBM)                          │
+│  - APIs de Predicción                                      │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🚀 Inicio Rápido
+
+### **1. Levantar Infraestructura**
+
+```bash
+# Clonar repositorio
+git clone <repo-url>
+cd ML-Homicidios
+
+# Configurar variables de entorno
+cp .env.example .env
+# Editar .env con tus credenciales de API
+
+# Levantar servicios Docker
+docker-compose up -d
+
+# Verificar que todo esté corriendo
+docker ps
+```
+
+### **2. Carga Inicial de Datos**
+
+```bash
+# Data Lake - Carga inicial
+docker exec ml-homicidios-etl-cron python scripts/load_datalake.py --initial
+
+# Data Warehouse - Carga inicial
+docker exec ml-homicidios-etl-cron python scripts/load_datawarehouse.py --initial
+```
+
+### **3. Verificar Datos**
+
+```bash
+# Acceder a Adminer
+# URL: http://localhost:8080
+
+# Data Lake
+# Servidor: datalake | Usuario: datalake_user | Password: datalake_password_2024
+
+# Data Warehouse
+# Servidor: datawarehouse | Usuario: dw_user | Password: dw_password_2024
+```
+
+---
+
+## 📊 Datos Disponibles
+
+### **Data Lake (Raw)**
+- **Homicidios**: ~332,000 registros (2003-2025)
+- **Departamentos**: 33 departamentos
+- **Municipios**: 1,121 municipios
+
+### **Data Warehouse (Transformado)**
+- **Dimensión Temporal**: 8,340 fechas
+- **Dimensión Geográfica**: 33 departamentos + 1,121 municipios
+- **Dimensión Demográfica**: 6 categorías de sexo
+- **Tabla de Hechos**: 332,131 homicidios
+
+---
+
+## 🤖 Automatización
+
+### **Cron Jobs Configurados**
+
+| Proceso | Frecuencia | Hora | Log |
+|---------|------------|------|-----|
+| Carga Data Lake | Viernes | 23:00 | `/app/logs/cron.log` |
+| Carga Data Warehouse | Sábado | 01:00 | `/app/logs/cron_dwh.log` |
+| Catch-up Data Lake | Diario | 08:00 | `/app/logs/catchup.log` |
+| Catch-up DWH | Diario | 09:00 | `/app/logs/catchup_dwh.log` |
+| Health Check | Diario | 02:00 | `/app/logs/health.log` |
+
+### **Monitoreo**
+
+```bash
+# Ver logs en tiempo real
+docker exec ml-homicidios-etl-cron tail -f /app/logs/cron.log
+docker exec ml-homicidios-etl-cron tail -f /app/logs/cron_dwh.log
+
+# Ver estado de contenedores
+docker ps
+
+# Ver logs de contenedor específico
+docker logs ml-homicidios-etl-cron --tail 50
+```
+
+---
+
+## 🔧 Comandos Útiles
+
+### **Data Lake**
+
+```bash
+# Carga inicial
+docker exec ml-homicidios-etl-cron python scripts/load_datalake.py --initial
+
+# Carga incremental
+docker exec ml-homicidios-etl-cron python scripts/load_datalake.py --incremental
+
+# Verificar catch-up
+docker exec ml-homicidios-etl-cron python scripts/catchup_check.py
+
+# Health check
+docker exec ml-homicidios-etl-cron python scripts/health_check.py
+```
+
+### **Data Warehouse**
+
+```bash
+# Carga inicial
+docker exec ml-homicidios-etl-cron python scripts/load_datawarehouse.py --initial
+
+# Carga incremental
+docker exec ml-homicidios-etl-cron python scripts/load_datawarehouse.py --incremental
+
+# Verificar catch-up
+docker exec ml-homicidios-etl-cron python scripts/catchup_check_dwh.py
+```
+
+### **Base de Datos**
+
+```bash
+# Conectar a Data Lake
+docker exec -it ml-homicidios-datalake psql -U datalake_user -d homicidios_datalake
+
+# Conectar a Data Warehouse
+docker exec -it ml-homicidios-datawarehouse psql -U dw_user -d homicidios_dw
+
+# Contar registros
+docker exec ml-homicidios-datalake psql -U datalake_user -d homicidios_datalake -c "SELECT COUNT(*) FROM raw_homicidios;"
+docker exec ml-homicidios-datawarehouse psql -U dw_user -d homicidios_dw -c "SELECT COUNT(*) FROM fact_homicidios;"
+```
+
+---
+
+## 📈 Vistas Analíticas (DWH)
+
+El Data Warehouse incluye vistas pre-calculadas para análisis:
+
+```sql
+-- Homicidios por departamento
+SELECT * FROM v_homicidios_por_departamento LIMIT 10;
+
+-- Homicidios por municipio
+SELECT * FROM v_homicidios_por_municipio LIMIT 10;
+
+-- Homicidios por sexo
+SELECT * FROM v_homicidios_por_sexo;
+
+-- Homicidios por mes
+SELECT * FROM v_homicidios_por_mes ORDER BY año DESC, mes DESC LIMIT 12;
+```
+
+---
+
+## 🛠️ Mantenimiento
+
+### **Reiniciar Servicios**
+
+```bash
+# Reiniciar todos los servicios
+docker-compose restart
+
+# Reiniciar servicio específico
+docker-compose restart etl-cron
+docker-compose restart datalake
+docker-compose restart datawarehouse
+```
+
+### **Limpiar y Recrear**
+
+```bash
+# Detener servicios
+docker-compose down
+
+# Eliminar volúmenes (CUIDADO: Borra todos los datos)
+docker volume rm ml-homicidios-datalake-data
+docker volume rm ml-homicidios-datawarehouse-data
+
+# Recrear desde cero
+docker-compose up -d
+
+# Esperar a que estén healthy
+docker ps
+
+# Cargar datos nuevamente
+docker exec ml-homicidios-etl-cron python scripts/load_datalake.py --initial
+docker exec ml-homicidios-etl-cron python scripts/load_datawarehouse.py --initial
+```
+
+---
+
+## 📝 Estructura del Proyecto
 
 ```
 ML-Homicidios/
-├── 📂 data/
-│   ├── raw/              # Data Lake - Datos crudos
-│   ├── processed/        # Data Warehouse - Datos procesados
-│   └── models/           # Modelos entrenados
-├── 📂 src/
-│   ├── config/           # Configuración centralizada
-│   ├── data_ingestion/   # Cliente API y scheduler
-│   ├── etl/              # Pipeline ETL
-│   ├── features/         # Ingeniería de features
-│   ├── models/           # Entrenamiento y predicción
-│   └── utils/            # Utilidades y logging
-├── 📂 app/
-│   ├── streamlit_app.py  # Dashboard principal
-│   ├── pages/            # Páginas del dashboard
-│   └── components/       # Componentes reutilizables
-├── 📂 notebooks/         # Análisis exploratorio
-├── 📂 tests/             # Pruebas unitarias
-├── 📂 docker/            # Configuración Docker
-├── 📄 requirements.txt   # Dependencias Python
-├── 📄 docker-compose.yml # Orquestación de servicios
-└── 📄 README.md          # Este archivo
+├── docker/                      # Configuración Docker
+│   ├── Dockerfile.etl          # Imagen del servicio ETL
+│   ├── entrypoint-cron.sh      # Script de inicio
+│   ├── crontab                 # Cron jobs
+│   └── init-scripts/           # Scripts de inicialización DB
+│       ├── 01-create-datalake-schema.sql
+│       └── 02-create-datawarehouse-schema.sql
+├── src/                        # Código fuente
+│   ├── config/                 # Configuración
+│   ├── data_ingestion/         # ETL Data Lake
+│   └── data_warehouse/         # ETL Data Warehouse
+├── scripts/                    # Scripts de ejecución
+│   ├── load_datalake.py
+│   ├── load_datawarehouse.py
+│   ├── catchup_check.py
+│   ├── catchup_check_dwh.py
+│   └── health_check.py
+├── docs/                       # Documentación
+│   ├── README.md              # Este archivo
+│   ├── DL_*.md                # Docs Data Lake
+│   └── DWH_*.md               # Docs Data Warehouse
+├── docker-compose.yml          # Orquestación de servicios
+├── .env.example               # Template de variables
+└── requirements.txt           # Dependencias Python
 ```
 
 ---
 
-## 📊 Fuentes de Datos
+## 🔐 Seguridad
 
-El proyecto integra **tres datasets oficiales** de Datos Abiertos Colombia:
-
-### 1. 🔴 Dataset de Homicidios
-
-**Propósito**: Datos históricos de homicidios en Colombia
-
-**Información incluida**:
-- Fecha del homicidio
-- Ubicación (departamento, municipio, zona)
-- Tipo de arma
-- Circunstancias
-- Datos demográficos de la víctima
-
-**Uso en el proyecto**: Dataset principal para entrenamiento de modelos predictivos
-
-### 2. 🗺️ DIVIPOLA Departamentos
-
-**Propósito**: División Político-Administrativa oficial de Colombia (DANE)
-
-**Información incluida**:
-- Código DANE del departamento (2 dígitos)
-- Nombre oficial del departamento
-- Región geográfica
-- Capital del departamento
-
-**Uso en el proyecto**: 
-- Estandarización de nombres de departamentos
-- Joins precisos con datos de homicidios
-- Agregaciones por región
-- Visualizaciones geográficas
-
-### 3. 🏘️ DIVIPOLA Municipios
-
-**Propósito**: Catálogo oficial de municipios de Colombia (DANE)
-
-**Información incluida**:
-- Código DANE del municipio (5 dígitos)
-- Nombre oficial del municipio
-- Código del departamento al que pertenece
-- Categoría del municipio (especial, 1, 2, 3, 4, 5, 6)
-- Tipo (urbano, rural)
-- Población estimada
-
-**Uso en el proyecto**:
-- Estandarización de nombres de municipios
-- Clasificación por tipo y categoría de municipio
-- Features adicionales (población, categoría)
-- Predicciones granulares a nivel municipal
-
-### 🔗 Integración de Datasets
-
-```mermaid
-graph LR
-    A[Homicidios] -->|JOIN por código DANE| B[DIVIPOLA Municipios]
-    B -->|JOIN por código depto| C[DIVIPOLA Departamentos]
-    C --> D[Dataset Enriquecido]
-    D --> E[Feature Engineering]
-    E --> F[Modelos ML]
-```
-
-**Beneficios de usar DIVIPOLA**:
-- ✅ **Códigos únicos**: Evita ambigüedades en nombres
-- ✅ **Datos oficiales**: Información validada por el DANE
-- ✅ **Features adicionales**: Población, categoría, tipo de municipio
-- ✅ **Joins precisos**: Relaciones uno-a-uno garantizadas
+- ✅ Credenciales en `.env` (nunca en Git)
+- ✅ `.env` en `.gitignore`
+- ✅ Contraseñas fuertes por defecto
+- ✅ Red Docker aislada
+- ✅ Puertos expuestos solo los necesarios
 
 ---
 
-## 🗄️ Data Lake y Data Warehouse
+## 🐛 Troubleshooting
 
-### Data Lake - Almacenamiento Crudo
-
-**Propósito**: Almacenar datos crudos con transformaciones mínimas
-
-**Ubicación**: `./data/raw/`
-
-**Formato**: Parquet (columnar, eficiente)
-
-**Contenido**:
-- Datos de homicidios con ID único asignado
-- DIVIPOLA departamentos (carga única)
-- DIVIPOLA municipios (carga única)
-
-**Transformaciones**:
-- ✅ Asignación de ID único (`homicidio_id`)
-- ✅ Conversión a Parquet
-- ❌ Sin limpieza de datos
-- ❌ Sin joins o agregaciones
-
-### Data Warehouse - Modelo Estrella
-
-**Propósito**: Datos procesados y optimizados para análisis
-
-**Ubicación**: `./data/processed/`
-
-**Modelo**: Star Schema (Estrella)
-
-**Tablas**:
-
-#### Tabla de Hechos
-- `fact_homicidios`: Eventos de homicidios con métricas
-
-#### Dimensiones
-- `dim_fecha`: Dimensión temporal (año, mes, día, etc.)
-- `dim_ubicacion`: Geografía enriquecida con DIVIPOLA
-- `dim_victima`: Características demográficas
-- `dim_arma`: Tipo de arma utilizada
-
-**Documentación completa**: Ver [docs/star_schema.md](docs/star_schema.md)
-
-### Pipeline ETL
-
-```mermaid
-sequenceDiagram
-    participant API as API Datos Abiertos
-    participant Lake as Data Lake
-    participant ETL as Proceso ETL
-    participant DW as Data Warehouse
-    participant ML as Modelos ML
-    
-    Note over API,Lake: Carga Inicial (Una vez)
-    API->>Lake: Full load de homicidios
-    API->>Lake: DIVIPOLA departamentos
-    API->>Lake: DIVIPOLA municipios
-    
-    Note over API,Lake: Carga Incremental (Viernes)
-    API->>Lake: Solo registros nuevos
-    
-    Note over Lake,DW: ETL Diario
-    Lake->>ETL: Leer datos crudos
-    ETL->>ETL: JOIN con DIVIPOLA
-    ETL->>ETL: Crear dimensiones
-    ETL->>DW: Cargar modelo estrella
-    
-    Note over DW,ML: Análisis y ML
-    DW->>ML: Features para modelos
-    ML->>ML: Entrenamiento
-```
-
----
-
-## 🚀 Instalación y Configuración
-
-### Prerrequisitos
-
-- Python 3.11 o superior
-- Docker & Docker Compose (opcional, para containerización)
-- Git
-
-### 1. Clonar el Repositorio
+### **Contenedor ETL reiniciando**
 
 ```bash
-git clone https://github.com/tu-usuario/ML-Homicidios.git
-cd ML-Homicidios
-```
-
-### 2. Configurar Entorno Virtual
-
-```bash
-# Crear entorno virtual
-python -m venv venv
-
-# Activar entorno virtual
-# Windows (Git Bash)
-source venv/Scripts/activate
-
-# Linux/Mac
-source venv/bin/activate
-```
-
-### 3. Instalar Dependencias
-
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Configurar Variables de Entorno
-
-```bash
-# Copiar template de variables de entorno
-cp .env.example .env
-
-# Editar .env con tus credenciales
-nano .env
-```
-
-**Variables requeridas en `.env`:**
-```env
-# ============================================================================
-# Datasets de Datos Abiertos Colombia
-# ============================================================================
-
-# 1. Dataset de Homicidios
-DATOS_ABIERTOS_HOMICIDIOS_ID=tu_dataset_id_homicidios
-
-# 2. DIVIPOLA Departamentos
-DATOS_ABIERTOS_DIVIPOLA_DEPARTAMENTOS_ID=tu_dataset_id_departamentos
-
-# 3. DIVIPOLA Municipios
-DATOS_ABIERTOS_DIVIPOLA_MUNICIPIOS_ID=tu_dataset_id_municipios
-
-# API Key (OPCIONAL - dejar vacío para API pública)
-DATOS_ABIERTOS_API_KEY=
-
-# ============================================================================
-# Base de Datos (SQLite por defecto para desarrollo)
-# ============================================================================
-DB_TYPE=sqlite
-DB_PATH=./data/homicidios.db
-
-# ============================================================================
-# Configuración de Modelos
-# ============================================================================
-DEFAULT_MODEL=xgboost
-MODEL_N_ESTIMATORS=100
-MODEL_MAX_DEPTH=6
-MODEL_LEARNING_RATE=0.1
-
-# ============================================================================
-# Logging
-# ============================================================================
-LOG_LEVEL=INFO
-LOG_FILE=./logs/ml_homicidios.log
-
-# ============================================================================
-# Ambiente
-# ============================================================================
-ENVIRONMENT=development
-DEBUG=True
-```
-
-**📝 Nota**: Para encontrar los IDs de los datasets:
-1. Ve a https://www.datos.gov.co
-2. Busca cada dataset (homicidios, divipola departamentos, divipola municipios)
-3. El ID está en la URL o en la sección "API" del dataset
-4. Ejemplo de ID: `abcd-1234`
-
----
-
-## 📊 Uso
-
-### Opción 1: Ejecución Local
-
-#### Extraer Datos
-
-```bash
-# Ejecutar extracción manual de datos
-python -m src.data_ingestion.api_client
-```
-
-#### Ejecutar Pipeline ETL
-
-```bash
-# Procesar datos crudos
-python -m src.etl.extract
-python -m src.etl.transform
-python -m src.etl.load
-```
-
-#### Entrenar Modelos
-
-```bash
-# Entrenar todos los modelos
-python -m src.models.train
-
-# Evaluar modelos
-python -m src.models.evaluate
-```
-
-#### Lanzar Dashboard
-
-```bash
-# Iniciar aplicación Streamlit
-streamlit run app/streamlit_app.py
-```
-
-### Opción 2: Docker Compose
-
-```bash
-# Construir y levantar todos los servicios
-docker-compose up --build
-
-# Ejecutar en background
-docker-compose up -d
-
 # Ver logs
-docker-compose logs -f
+docker logs ml-homicidios-etl-cron --tail 100
 
-# Detener servicios
-docker-compose down
+# Verificar conexiones
+docker exec ml-homicidios-etl-cron python -c "from src.data_ingestion.db_connection import DatabaseConnection; db = DatabaseConnection(); print('OK' if db.test_connection() else 'FAIL')"
 ```
 
----
-
-## 🧪 Testing
+### **No hay datos en DWH**
 
 ```bash
-# Ejecutar todos los tests
-pytest tests/ -v
+# Verificar Data Lake
+docker exec ml-homicidios-datalake psql -U datalake_user -d homicidios_datalake -c "SELECT COUNT(*) FROM raw_homicidios;"
 
-# Con cobertura
-pytest tests/ --cov=src --cov-report=html
-
-# Tests específicos
-pytest tests/test_etl.py -v
+# Ejecutar carga inicial DWH
+docker exec ml-homicidios-etl-cron python scripts/load_datawarehouse.py --initial
 ```
 
----
-
-## 📈 Pipeline de Datos
-
-### 1. Extracción (Extract)
-- Conexión a API de Datos Abiertos
-- Descarga de datos de homicidios
-- Almacenamiento en Data Lake (Parquet)
-
-### 2. Transformación (Transform)
-- Limpieza de datos
-- Estandarización de ubicaciones
-- Agregaciones por nivel geográfico
-- Generación de features temporales
-
-### 3. Carga (Load)
-- Almacenamiento en Data Warehouse
-- Versionado de datos
-- Validación de calidad
-
-### 4. Automatización
-- Cron job diario para extracción
-- Reentrenamiento semanal de modelos
-- Actualización automática de predicciones
-
----
-
-## 🤖 Modelos de Machine Learning
-
-### Modelos Implementados
-
-1. **Modelo por Departamento**
-   - Predicción de tasas a nivel departamental
-   - Features: históricos, estacionalidad, tendencias
-
-2. **Modelo por Municipio**
-   - Predicción granular por municipio
-   - Features: población, tipo, departamento
-
-3. **Modelo por Zona**
-   - Predicción por zona geográfica
-   - Features: urbano/rural, características socioeconómicas
-
-4. **Modelo por Tipo de Municipio**
-   - Clasificación y predicción por tipo
-   - Features: categorización, patrones históricos
-
-### Algoritmos Utilizados
-- **XGBoost**: Gradient boosting optimizado
-- **LightGBM**: Alternativa rápida y eficiente
-- **Prophet**: Series temporales
-- **Scikit-learn**: Baseline y preprocessing
-
-### Métricas de Evaluación
-- **RMSE** (Root Mean Square Error)
-- **MAE** (Mean Absolute Error)
-- **R²** (Coefficient of Determination)
-- **MAPE** (Mean Absolute Percentage Error)
-
----
-
-## 📱 Dashboard Streamlit
-
-### Páginas Disponibles
-
-#### 🏠 Home
-- Resumen ejecutivo
-- Estadísticas clave
-- Mapa interactivo de Colombia
-
-#### 📊 Análisis Exploratorio (EDA)
-- Distribuciones de homicidios
-- Tendencias temporales
-- Análisis por región
-
-#### 🤖 Predicciones
-- Interfaz de predicción interactiva
-- Selección de ubicación y horizonte
-- Intervalos de confianza
-- Visualización de resultados
-
-#### 📈 Tendencias
-- Análisis histórico
-- Patrones estacionales
-- Comparativas regionales
-
----
-
-## 🔧 Comandos Útiles (Makefile)
+### **Cron jobs no ejecutan**
 
 ```bash
-# Setup inicial
-make setup
+# Verificar crontab
+docker exec ml-homicidios-etl-cron crontab -l
 
-# Ejecutar pipeline completo
-make pipeline
-
-# Entrenar modelos
-make train
-
-# Ejecutar tests
-make test
-
-# Limpiar archivos temporales
-make clean
-
-# Formatear código
-make format
-
-# Linting
-make lint
+# Ver logs de cron
+docker exec ml-homicidios-etl-cron tail -f /app/logs/cron.log
 ```
 
 ---
 
-## 📝 Roadmap
+## 📞 Soporte
 
-### Fase 1: Fundación ✅
-- [x] Estructura del proyecto
-- [x] Configuración de dependencias
-- [x] README y documentación
-
-### Fase 2: Pipeline de Datos 🚧
-- [ ] Cliente API Datos Abiertos
-- [ ] Pipeline ETL
-- [ ] Data Lake y Warehouse
-- [ ] Cron jobs
-
-### Fase 3: Machine Learning 📅
-- [ ] EDA y análisis
-- [ ] Feature engineering
-- [ ] Entrenamiento de modelos
-- [ ] Evaluación y selección
-
-### Fase 4: Dashboard 📅
-- [ ] Aplicación Streamlit
-- [ ] Visualizaciones
-- [ ] Interfaz de predicciones
-
-### Fase 5: Deployment 📅
-- [ ] Docker containers
-- [ ] Streamlit Cloud
-- [ ] CI/CD
-- [ ] Documentación final
+Para más información, consulta la documentación específica en la carpeta `docs/`:
+- **Data Lake**: Archivos con prefijo `DL_`
+- **Data Warehouse**: Archivos con prefijo `DWH_`
+- **Docker**: Carpeta `docker/`
 
 ---
 
-## 🤝 Contribución
+## ✅ Checklist de Implementación
 
-Este es un proyecto de aprendizaje. Si tienes sugerencias o mejoras:
-
-1. Fork el proyecto
-2. Crea una rama (`git checkout -b feature/mejora`)
-3. Commit tus cambios (`git commit -m 'Agregar mejora'`)
-4. Push a la rama (`git push origin feature/mejora`)
-5. Abre un Pull Request
-
----
-
-## 📚 Recursos y Referencias
-
-### Datos
-- [Datos Abiertos Colombia](https://www.datos.gov.co/)
-- [API Socrata](https://dev.socrata.com/)
-
-### Documentación
-- [Streamlit Docs](https://docs.streamlit.io/)
-- [Scikit-learn](https://scikit-learn.org/)
-- [XGBoost](https://xgboost.readthedocs.io/)
-- [Prophet](https://facebook.github.io/prophet/)
-
-### Tutoriales
-- [Docker para Data Science](https://docker-curriculum.com/)
-- [MLOps Best Practices](https://ml-ops.org/)
+- [x] Docker Compose configurado
+- [x] Data Lake schema creado
+- [x] Data Warehouse schema creado
+- [x] ETL Data Lake implementado
+- [x] ETL Data Warehouse implementado
+- [x] Cron jobs configurados
+- [x] Catch-up automático implementado
+- [x] Health checks configurados
+- [x] Documentación completa
+- [x] Vistas analíticas creadas
 
 ---
 
-## 📄 Licencia
-
-Este proyecto está bajo la Licencia MIT. Ver archivo `LICENSE` para más detalles.
-
----
-
-## 👤 Autor
-
-**Rai De León**
-
-- GitHub: [@tu-usuario](https://github.com/tu-usuario)
-- LinkedIn: [Tu Perfil](https://linkedin.com/in/tu-perfil)
-
----
-
-## 🙏 Agradecimientos
-
-- Datos Abiertos Colombia por proporcionar acceso a datos públicos
-- Comunidad de Python y ML por las herramientas open source
-- Streamlit por facilitar la creación de dashboards
-
----
-
-## 📞 Contacto
-
-¿Preguntas o sugerencias? Abre un [issue](https://github.com/tu-usuario/ML-Homicidios/issues) o contáctame directamente.
-
----
-
-**⭐ Si este proyecto te resulta útil, considera darle una estrella en GitHub!**
+¡El sistema está listo para análisis y Machine Learning! 🚀

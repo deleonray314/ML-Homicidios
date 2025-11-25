@@ -1,0 +1,52 @@
+FROM python:3.12-alpine
+
+# Metadata
+LABEL maintainer="ML-Homicidios ETL Service"
+LABEL description="Servicio ETL con cron para cargas automáticas del Data Lake"
+
+# Instalar cron y dependencias del sistema
+RUN apk add --no-cache \
+    tzdata \
+    dcron \
+    postgresql-client \
+    bash \
+    && rm -rf /var/cache/apk/*
+
+# Configurar zona horaria (Colombia)
+ENV TZ=America/Bogota
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+# Crear directorio de trabajo
+WORKDIR /app
+
+# Copiar requirements
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copiar código fuente
+COPY src/ ./src/
+COPY scripts/ ./scripts/
+COPY .env .env
+
+# Crear directorio de logs
+RUN mkdir -p /app/logs
+
+# Copiar configuración de cron
+COPY docker/crontab /etc/crontabs/root
+
+# Dar permisos correctos al crontab
+RUN chmod 0644 /etc/crontabs/root
+
+# Copiar script de inicio
+COPY docker/entrypoint-cron.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+# Exponer logs como volumen
+VOLUME ["/app/logs"]
+
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 \
+    CMD pgrep crond || exit 1
+
+# Ejecutar cron en foreground
+ENTRYPOINT ["/entrypoint.sh"]

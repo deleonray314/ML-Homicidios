@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # ============================================================================
   # Data Lake - PostgreSQL
@@ -11,24 +9,17 @@ services:
     restart: unless-stopped
 
     # Port mapping para acceso desde localhost (desarrollo/testing)
-    # Para producción, comentar estas líneas y usar solo red Docker
     ports:
       - "5433:5432"
 
     environment:
-      # Credenciales de la base de datos
       POSTGRES_USER: ${DATALAKE_USER:-datalake_user}
       POSTGRES_PASSWORD: ${DATALAKE_PASSWORD:-datalake_password}
       POSTGRES_DB: ${DATALAKE_DB:-homicidios_datalake}
-
-      # Configuración de PostgreSQL
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=es_CO.UTF-8"
 
     volumes:
-      # Persistencia de datos
       - datalake_data:/var/lib/postgresql/data
-
-      # Scripts de inicialización
       - ./docker/init-scripts/01-create-datalake-schema.sql:/docker-entrypoint-initdb.d/01-create-schema.sql
 
     networks:
@@ -45,14 +36,11 @@ services:
   # Base de datos para el modelo estrella (fact + dimensions)
   # ============================================================================
   datawarehouse:
+    ports:
+      - "5434:5432"
     image: postgres:15-alpine
     container_name: ml-homicidios-datawarehouse
     restart: unless-stopped
-
-    # NO exponemos puertos al host
-    # Solo accesible desde otros contenedores en la red Docker
-    # ports:
-    #   - "5434:5432"  # COMENTADO - no exponer al host
 
     environment:
       POSTGRES_USER: ${DW_USER:-dw_user}
@@ -86,7 +74,7 @@ services:
 
     environment:
       ADMINER_DEFAULT_SERVER: datalake
-      ADMINER_DESIGN: pepa-linha # Tema moderno
+      ADMINER_DESIGN: pepa-linha
 
     networks:
       - ml-homicidios-network
@@ -94,6 +82,45 @@ services:
     depends_on:
       - datalake
       - datawarehouse
+
+  # ============================================
+  # Servicio ETL con Cron
+  # ============================================
+  etl-cron:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.etl
+    container_name: ml-homicidios-etl-cron
+    restart: unless-stopped
+
+    environment:
+      - TZ=America/Bogota
+      - PYTHONUNBUFFERED=1
+
+    volumes:
+      # Logs persistentes
+      - ./logs:/app/logs
+      # Código fuente (para desarrollo - hot reload)
+      - ./src:/app/src:ro
+      - ./scripts:/app/scripts:ro
+      # Configuración
+      - ./.env:/app/.env:ro
+
+    networks:
+      - ml-homicidios-network
+
+    depends_on:
+      datalake:
+        condition: service_healthy
+      datawarehouse:
+        condition: service_healthy
+
+    healthcheck:
+      test: [ "CMD", "pgrep", "crond" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
 # ==============================================================================
 # Volumes - Persistencia de datos

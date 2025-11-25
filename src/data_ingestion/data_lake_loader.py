@@ -123,9 +123,9 @@ class DataLakeLoader:
             values = [
                 (
                     record.get("fecha_hecho"),
-                    record.get("cod_depto"),
+                    int(record.get("cod_depto")) if record.get("cod_depto") else None,
                     record.get("departamento"),
-                    record.get("cod_muni"),
+                    int(record.get("cod_muni")) if record.get("cod_muni") else None,
                     record.get("municipio"),
                     record.get("zona"),
                     record.get("sexo"),
@@ -213,9 +213,9 @@ class DataLakeLoader:
             values = [
                 (
                     record.get("fecha_hecho"),
-                    record.get("cod_depto"),
+                    int(record.get("cod_depto")) if record.get("cod_depto") else None,
                     record.get("departamento"),
-                    record.get("cod_muni"),
+                    int(record.get("cod_muni")) if record.get("cod_muni") else None,
                     record.get("municipio"),
                     record.get("zona"),
                     record.get("sexo"),
@@ -281,7 +281,7 @@ class DataLakeLoader:
             
             values = [
                 (
-                    record.get("cod_dpto"),
+                    int(record.get("cod_dpto")) if record.get("cod_dpto") else None,
                     record.get("nom_dpto"),
                     float(record.get("latitud")) if record.get("latitud") else None,
                     float(record.get("longitud")) if record.get("longitud") else None,
@@ -348,9 +348,9 @@ class DataLakeLoader:
             
             values = [
                 (
-                    record.get("cod_dpto"),
+                    int(record.get("cod_dpto")) if record.get("cod_dpto") else None,
                     record.get("nom_dpto"),
-                    record.get("cod_mpio"),
+                    int(record.get("cod_mpio")) if record.get("cod_mpio") else None,
                     record.get("nom_mpio"),
                     record.get("tipo"),
                     float(record.get("latitud")) if record.get("latitud") else None,

@@ -1,0 +1,57 @@
+# ============================================
+# Cron Jobs - ETL Data Lake ML-Homicidios
+# ============================================
+# Formato: minuto hora día mes día_semana comando
+# 
+# Días de la semana:
+#   0 = Domingo
+#   1 = Lunes
+#   2 = Martes
+#   3 = Miércoles
+#   4 = Jueves
+#   5 = Viernes
+#   6 = Sábado
+# ============================================
+
+# ============================================
+# CARGA INCREMENTAL SEMANAL
+# ============================================
+# Cada viernes a las 23:00 (hora Colombia)
+# Extrae nuevos registros de homicidios desde la API
+0 23 * * 5 cd /app && python scripts/load_datalake.py --incremental >> /app/logs/cron.log 2>&1
+
+# ============================================
+# ETL DATA WAREHOUSE - CARGA INCREMENTAL
+# ============================================
+# Cada sábado a las 01:00 (después de carga del Data Lake)
+# Transforma y carga datos del Data Lake al Data Warehouse
+0 1 * * 6 cd /app && python scripts/load_datawarehouse.py --incremental >> /app/logs/cron_dwh.log 2>&1
+
+# ============================================
+# VERIFICACIÓN DIARIA DE CARGAS PERDIDAS
+# ============================================
+# Cada día a las 08:00
+# Detecta si se perdieron cargas y ejecuta catch-up automático
+0 8 * * * cd /app && python scripts/catchup_check.py && [ $? -eq 1 ] && python scripts/load_datalake.py --incremental >> /app/logs/catchup.log 2>&1
+
+# Verificación DWH cada día a las 09:00
+0 9 * * * cd /app && python scripts/catchup_check_dwh.py && [ $? -eq 1 ] && python scripts/load_datawarehouse.py --incremental >> /app/logs/catchup_dwh.log 2>&1
+
+# ============================================
+# HEALTH CHECK DIARIO
+# ============================================
+# Cada día a las 02:00
+# Verifica estado del sistema y última carga
+0 2 * * * cd /app && python scripts/health_check.py >> /app/logs/health.log 2>&1
+
+# ============================================
+# LIMPIEZA DE LOGS ANTIGUOS
+# ============================================
+# Cada domingo a las 03:00
+# Elimina logs con más de 30 días de antigüedad
+0 3 * * 0 find /app/logs -name "*.log" -mtime +30 -delete
+
+# ============================================
+# LÍNEA VACÍA REQUERIDA POR CRON
+# ============================================
+
