@@ -26,7 +26,7 @@ services:
       - ml-homicidios-network
 
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${DATALAKE_USER:-datalake_user}" ]
+      test: [ "CMD-SHELL", "pg_isready -U ${DATALAKE_USER:-datalake_user} -d ${DATALAKE_DB:-homicidios_datalake}" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -56,7 +56,7 @@ services:
       - ml-homicidios-network
 
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${DW_USER:-dw_user}" ]
+      test: [ "CMD-SHELL", "pg_isready -U ${DW_USER:-dw_user} -d ${DW_DB:-homicidios_dw}" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -82,6 +82,43 @@ services:
     depends_on:
       - datalake
       - datawarehouse
+
+  # ============================================================================
+  # Jupyter Lab - Entorno de análisis de datos
+  # Acceso a través de http://localhost:8888
+  # ============================================================================
+  jupyter:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.jupyter
+    container_name: ml-homicidios-jupyter
+    restart: unless-stopped
+
+    ports:
+      - "8888:8888"
+
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+      - JUPYTER_TOKEN=
+      - TZ=America/Bogota
+
+    volumes:
+      # Notebooks persistentes
+      - ./notebooks:/app/notebooks
+      # Acceso al código fuente (solo lectura)
+      - ./src:/app/src:ro
+      - ./scripts:/app/scripts:ro
+      # Variables de entorno
+      - ./.env:/app/.env:ro
+
+    networks:
+      - ml-homicidios-network
+
+    depends_on:
+      datalake:
+        condition: service_healthy
+      datawarehouse:
+        condition: service_healthy
 
   # ============================================
   # Servicio ETL con Cron
@@ -130,7 +167,6 @@ volumes:
     name: ml-homicidios-datalake-data
   datawarehouse_data:
     name: ml-homicidios-datawarehouse-data
-
 # ==============================================================================
 # Networks - Red interna para comunicación entre servicios
 # ==============================================================================

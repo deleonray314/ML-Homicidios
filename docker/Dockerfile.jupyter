@@ -1,0 +1,60 @@
+# ============================================================================
+# Dockerfile para Jupyter Lab
+# Entorno de análisis de datos con acceso a la red Docker
+# ============================================================================
+
+FROM python:3.12-slim
+
+# Metadata
+LABEL maintainer="ML-Homicidios Project"
+LABEL description="Jupyter Lab para análisis exploratorio de datos"
+
+# Variables de entorno
+ENV PYTHONUNBUFFERED=1 \
+    JUPYTER_ENABLE_LAB=yes \
+    JUPYTER_TOKEN="" \
+    JUPYTER_PORT=8888
+
+# Directorio de trabajo
+WORKDIR /app
+
+# Instalar dependencias del sistema
+RUN apt-get update && apt-get install -y \
+    gcc \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copiar requirements si existe, sino instalar paquetes directamente
+COPY requirements.txt* ./
+
+# Instalar dependencias de Python
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir \
+    jupyterlab \
+    pandas \
+    numpy \
+    matplotlib \
+    seaborn \
+    plotly \
+    sqlalchemy \
+    psycopg2-binary \
+    python-dotenv \
+    ipywidgets \
+    && pip install --no-cache-dir -r requirements.txt 2>/dev/null || true
+
+# Crear directorio para notebooks
+RUN mkdir -p /app/notebooks
+
+# Exponer puerto de Jupyter
+EXPOSE 8888
+
+# Comando de inicio
+# Nota: --ip=0.0.0.0 permite acceso desde fuera del contenedor
+# --no-browser evita intentar abrir navegador dentro del contenedor
+# --allow-root permite ejecutar como root (necesario en algunos casos)
+CMD ["jupyter", "lab", \
+    "--ip=0.0.0.0", \
+    "--port=8888", \
+    "--no-browser", \
+    "--allow-root", \
+    "--notebook-dir=/app/notebooks"]
