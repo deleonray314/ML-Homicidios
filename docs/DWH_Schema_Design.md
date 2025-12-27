@@ -14,7 +14,7 @@ erDiagram
     FACT_HOMICIDIOS ||--o{ DIM_UBICACION : ocurre_en
     FACT_HOMICIDIOS ||--o{ DIM_VICTIMA : afecta_a
     FACT_HOMICIDIOS ||--o{ DIM_ARMA : usa
-    
+
     FACT_HOMICIDIOS {
         bigint homicidio_id PK
         int fecha_id FK
@@ -25,7 +25,7 @@ erDiagram
         float tasa_por_100k
         timestamp created_at
     }
-    
+
     DIM_FECHA {
         int fecha_id PK
         date fecha
@@ -41,7 +41,7 @@ erDiagram
         boolean es_fin_semana
         boolean es_festivo
     }
-    
+
     DIM_UBICACION {
         int ubicacion_id PK
         string codigo_dane_municipio
@@ -56,7 +56,7 @@ erDiagram
         float latitud
         float longitud
     }
-    
+
     DIM_VICTIMA {
         int victima_id PK
         int edad
@@ -65,7 +65,7 @@ erDiagram
         string ocupacion
         string estado_civil
     }
-    
+
     DIM_ARMA {
         int arma_id PK
         string tipo_arma
@@ -82,20 +82,21 @@ erDiagram
 
 **Propósito**: Almacena los eventos de homicidios con referencias a las dimensiones.
 
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `homicidio_id` | BIGINT | ID único del homicidio (PK) |
-| `fecha_id` | INT | FK a dim_fecha |
-| `ubicacion_id` | INT | FK a dim_ubicacion |
-| `victima_id` | INT | FK a dim_victima |
-| `arma_id` | INT | FK a dim_arma |
-| `cantidad` | INT | Cantidad de víctimas (usualmente 1) |
-| `tasa_por_100k` | FLOAT | Tasa por 100,000 habitantes |
-| `created_at` | TIMESTAMP | Fecha de carga del registro |
+| Campo           | Tipo      | Descripción                         |
+| --------------- | --------- | ----------------------------------- |
+| `homicidio_id`  | BIGINT    | ID único del homicidio (PK)         |
+| `fecha_id`      | INT       | FK a dim_fecha                      |
+| `ubicacion_id`  | INT       | FK a dim_ubicacion                  |
+| `victima_id`    | INT       | FK a dim_victima                    |
+| `arma_id`       | INT       | FK a dim_arma                       |
+| `cantidad`      | INT       | Cantidad de víctimas (usualmente 1) |
+| `tasa_por_100k` | FLOAT     | Tasa por 100,000 habitantes         |
+| `created_at`    | TIMESTAMP | Fecha de carga del registro         |
 
 **Granularidad**: Un registro por homicidio
 
 **Métricas**:
+
 - Cantidad de homicidios
 - Tasa de homicidios por 100,000 habitantes
 
@@ -105,21 +106,21 @@ erDiagram
 
 **Propósito**: Dimensión temporal para análisis por tiempo.
 
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `fecha_id` | INT | ID único (PK) |
-| `fecha` | DATE | Fecha completa |
-| `año` | INT | Año (2010-2024) |
-| `mes` | INT | Mes (1-12) |
-| `trimestre` | INT | Trimestre (1-4) |
-| `semestre` | INT | Semestre (1-2) |
-| `dia_mes` | INT | Día del mes (1-31) |
-| `dia_año` | INT | Día del año (1-366) |
-| `dia_semana` | INT | Día de la semana (1=Lunes, 7=Domingo) |
-| `nombre_dia` | VARCHAR(10) | Nombre del día |
-| `nombre_mes` | VARCHAR(10) | Nombre del mes |
-| `es_fin_semana` | BOOLEAN | Si es sábado o domingo |
-| `es_festivo` | BOOLEAN | Si es día festivo en Colombia |
+| Campo           | Tipo        | Descripción                           |
+| --------------- | ----------- | ------------------------------------- |
+| `fecha_id`      | INT         | ID único (PK)                         |
+| `fecha`         | DATE        | Fecha completa                        |
+| `año`           | INT         | Año (2010-2024)                       |
+| `mes`           | INT         | Mes (1-12)                            |
+| `trimestre`     | INT         | Trimestre (1-4)                       |
+| `semestre`      | INT         | Semestre (1-2)                        |
+| `dia_mes`       | INT         | Día del mes (1-31)                    |
+| `dia_año`       | INT         | Día del año (1-366)                   |
+| `dia_semana`    | INT         | Día de la semana (1=Lunes, 7=Domingo) |
+| `nombre_dia`    | VARCHAR(10) | Nombre del día                        |
+| `nombre_mes`    | VARCHAR(10) | Nombre del mes                        |
+| `es_fin_semana` | BOOLEAN     | Si es sábado o domingo                |
+| `es_festivo`    | BOOLEAN     | Si es día festivo en Colombia         |
 
 **Uso**: Agregaciones temporales, análisis de tendencias, estacionalidad
 
@@ -129,20 +130,20 @@ erDiagram
 
 **Propósito**: Dimensión geográfica enriquecida con DIVIPOLA.
 
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `ubicacion_id` | INT | ID único (PK) |
-| `codigo_dane_municipio` | VARCHAR(5) | Código DANE del municipio |
-| `municipio` | VARCHAR(100) | Nombre del municipio |
-| `codigo_dane_departamento` | VARCHAR(2) | Código DANE del departamento |
-| `departamento` | VARCHAR(50) | Nombre del departamento |
-| `region` | VARCHAR(50) | Región geográfica (Andina, Caribe, etc.) |
-| `zona` | VARCHAR(20) | Urbana/Rural |
-| `tipo_municipio` | VARCHAR(50) | Tipo según DIVIPOLA |
-| `categoria_municipio` | VARCHAR(20) | Categoría (Especial, 1-6) |
-| `poblacion` | INT | Población estimada |
-| `latitud` | FLOAT | Coordenada latitud |
-| `longitud` | FLOAT | Coordenada longitud |
+| Campo                      | Tipo         | Descripción                              |
+| -------------------------- | ------------ | ---------------------------------------- |
+| `ubicacion_id`             | INT          | ID único (PK)                            |
+| `codigo_dane_municipio`    | VARCHAR(5)   | Código DANE del municipio                |
+| `municipio`                | VARCHAR(100) | Nombre del municipio                     |
+| `codigo_dane_departamento` | VARCHAR(2)   | Código DANE del departamento             |
+| `departamento`             | VARCHAR(50)  | Nombre del departamento                  |
+| `region`                   | VARCHAR(50)  | Región geográfica (Andina, Caribe, etc.) |
+| `zona`                     | VARCHAR(20)  | Urbana/Rural                             |
+| `tipo_municipio`           | VARCHAR(50)  | Tipo según DIVIPOLA                      |
+| `categoria_municipio`      | VARCHAR(20)  | Categoría (Especial, 1-6)                |
+| `poblacion`                | INT          | Población estimada                       |
+| `latitud`                  | FLOAT        | Coordenada latitud                       |
+| `longitud`                 | FLOAT        | Coordenada longitud                      |
 
 **Fuente**: Integración de datos de homicidios + DIVIPOLA
 
@@ -154,14 +155,14 @@ erDiagram
 
 **Propósito**: Características demográficas de las víctimas.
 
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `victima_id` | INT | ID único (PK) |
-| `edad` | INT | Edad de la víctima |
-| `genero` | VARCHAR(20) | Masculino/Femenino/Otro |
-| `grupo_edad` | VARCHAR(20) | 0-17, 18-25, 26-40, 41-60, 60+ |
-| `ocupacion` | VARCHAR(100) | Ocupación (si disponible) |
-| `estado_civil` | VARCHAR(50) | Estado civil (si disponible) |
+| Campo          | Tipo         | Descripción                    |
+| -------------- | ------------ | ------------------------------ |
+| `victima_id`   | INT          | ID único (PK)                  |
+| `edad`         | INT          | Edad de la víctima             |
+| `genero`       | VARCHAR(20)  | Masculino/Femenino/Otro        |
+| `grupo_edad`   | VARCHAR(20)  | 0-17, 18-25, 26-40, 41-60, 60+ |
+| `ocupacion`    | VARCHAR(100) | Ocupación (si disponible)      |
+| `estado_civil` | VARCHAR(50)  | Estado civil (si disponible)   |
 
 **Uso**: Análisis demográfico, perfiles de víctimas
 
@@ -171,12 +172,12 @@ erDiagram
 
 **Propósito**: Tipo de arma utilizada en el homicidio.
 
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `arma_id` | INT | ID único (PK) |
-| `tipo_arma` | VARCHAR(100) | Tipo específico de arma |
-| `categoria_arma` | VARCHAR(50) | Arma de fuego/Arma blanca/Otro |
-| `descripcion` | TEXT | Descripción adicional |
+| Campo            | Tipo         | Descripción                    |
+| ---------------- | ------------ | ------------------------------ |
+| `arma_id`        | INT          | ID único (PK)                  |
+| `tipo_arma`      | VARCHAR(100) | Tipo específico de arma        |
+| `categoria_arma` | VARCHAR(50)  | Arma de fuego/Arma blanca/Otro |
+| `descripcion`    | TEXT         | Descripción adicional          |
 
 **Uso**: Análisis por tipo de arma, patrones de violencia
 
@@ -195,12 +196,12 @@ graph LR
     C --> D3[dim_victima]
     C --> D4[dim_arma]
     C --> F[fact_homicidios]
-    
+
     D1 --> F
     D2 --> F
     D3 --> F
     D4 --> F
-    
+
     style A fill:#e1f5ff
     style F fill:#ffe1f5
 ```
@@ -222,7 +223,7 @@ graph LR
 ### Homicidios por Departamento y Año
 
 ```sql
-SELECT 
+SELECT
     u.departamento,
     f.año,
     COUNT(*) as total_homicidios,
@@ -237,7 +238,7 @@ ORDER BY f.año DESC, total_homicidios DESC;
 ### Tendencia Mensual por Región
 
 ```sql
-SELECT 
+SELECT
     u.region,
     f.año,
     f.mes,
@@ -252,7 +253,7 @@ ORDER BY f.año, f.mes;
 ### Análisis por Tipo de Arma y Género
 
 ```sql
-SELECT 
+SELECT
     a.categoria_arma,
     v.genero,
     COUNT(*) as total_homicidios,
@@ -269,16 +270,19 @@ ORDER BY total_homicidios DESC;
 ## 🎯 Beneficios del Modelo Estrella
 
 ### Para Análisis
+
 - ✅ **Queries simples**: JOINs directos desde la tabla de hechos
 - ✅ **Performance**: Optimizado para agregaciones
 - ✅ **Intuitivo**: Fácil de entender y usar
 
 ### Para Machine Learning
+
 - ✅ **Features listas**: Dimensiones son features naturales
 - ✅ **Agregaciones rápidas**: Calcular estadísticas por grupo
 - ✅ **Escalable**: Fácil agregar nuevas dimensiones
 
 ### Para BI/Dashboards
+
 - ✅ **Compatible con herramientas BI**: Power BI, Tableau, Looker
 - ✅ **Drill-down natural**: De año → mes → día
 - ✅ **Filtros eficientes**: Por cualquier dimensión
@@ -323,13 +327,3 @@ El modelo estrella permite calcular fácilmente:
 4. **Perfiles de víctimas** (edad, género)
 5. **Patrones de violencia** (tipo de arma, zona)
 6. **Estacionalidad** (día de la semana, mes, festivos)
-
----
-
-## 🚀 Próximos Pasos
-
-1. Implementar scripts de creación de tablas
-2. Desarrollar proceso ETL completo
-3. Crear vistas materializadas para queries frecuentes
-4. Implementar particionamiento por año (si es necesario)
-5. Configurar backups y mantenimiento

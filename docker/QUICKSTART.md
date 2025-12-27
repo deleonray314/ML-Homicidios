@@ -35,6 +35,7 @@ docker-compose ps
 ```
 
 Deberías ver 3 servicios con estado "Up (healthy)":
+
 - `ml-homicidios-datalake`
 - `ml-homicidios-datawarehouse`
 - `ml-homicidios-adminer`
@@ -52,6 +53,7 @@ Deberías ver 3 servicios con estado "Up (healthy)":
 ### 6. Explorar las Tablas
 
 En Adminer verás las tablas creadas:
+
 - `raw_homicidios`
 - `raw_divipola_departamentos`
 - `raw_divipola_municipios`
@@ -81,17 +83,13 @@ docker exec -it ml-homicidios-datalake psql -U datalake_user -d homicidios_datal
 docker exec -it ml-homicidios-datawarehouse psql -U dw_user -d homicidios_dw -c "\dt"
 ```
 
----
-
 ## 🔧 Troubleshooting
 
-**Error: "port is already allocated"**
-- Cambia los puertos en `docker-compose.yml`
-- O detén el servicio que está usando ese puerto
-
 **Error: "Cannot connect to Docker daemon"**
+
 - Asegúrate de que Docker Desktop esté corriendo
 
 **Las tablas no se crearon**
+
 - Verifica los logs: `docker-compose logs datalake`
 - Elimina el volumen y reinicia: `docker-compose down -v && docker-compose up -d`

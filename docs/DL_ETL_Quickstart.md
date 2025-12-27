@@ -1,48 +1,27 @@
 # 🚀 Guía Rápida: Ejecutar ETL del Data Lake
 
-## ✅ Pasos Completados
+## ✅ Requisitos
 
 1. ✅ Docker corriendo (Data Lake, Data Warehouse, Adminer)
 2. ✅ Esquemas de base de datos creados
-3. ✅ Código ETL implementado:
-   - `src/utils/logger.py` - Logging estructurado
-   - `src/data_ingestion/api_client.py` - Cliente de API
-   - `src/data_ingestion/db_connection.py` - Conexión a PostgreSQL
-   - `src/data_ingestion/data_lake_loader.py` - Cargador de datos
-   - `scripts/load_datalake.py` - Script principal
+3. ✅ Código ETL implementado
 
-## 🔧 Problema Actual
-
-El puerto 5433 no está expuesto. Necesitas reiniciar Docker.
-
-## 🎯 Solución Rápida
-
-```bash
-# 1. Detener Docker
-docker-compose down
-
-# 2. Iniciar Docker (con puerto 5433 expuesto)
-docker-compose up -d
-
-# 3. Esperar 10 segundos para que inicie
-
-# 4. Probar carga de departamentos
-python scripts/load_datalake.py --dataset departamentos
-```
-
-## 📊 Comandos Disponibles
+## 🎯 Comandos de Ejecución
 
 ### Carga Inicial Completa
+
 ```bash
 python scripts/load_datalake.py --initial
 ```
 
 ### Carga Incremental
+
 ```bash
 python scripts/load_datalake.py --incremental
 ```
 
 ### Cargar Dataset Específico
+
 ```bash
 # Departamentos (33 registros)
 python scripts/load_datalake.py --dataset departamentos
@@ -72,18 +51,22 @@ python scripts/load_datalake.py --dataset homicidios --initial
 ## ⚠️ Troubleshooting
 
 **Error: Connection refused**
+
 - Solución: Reinicia Docker con `docker-compose down && docker-compose up -d`
 
 **Error: No module named 'src'**
+
 - Solución: Ejecuta desde la raíz del proyecto, no desde `src/`
 
 **Error: API timeout**
+
 - Solución: Verifica tu conexión a internet
 - La API de Datos Abiertos puede estar lenta
 
 ## 📝 Próximos Pasos
 
 Después de cargar los datos:
+
 1. Verificar en Adminer que los datos se cargaron
 2. Implementar ETL del Data Warehouse (transformación al modelo estrella)
 3. Crear dashboards en Streamlit

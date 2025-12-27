@@ -55,16 +55,16 @@ Ejecuta este script en DBeaver:
 
 ```sql
 -- Agregar FOREIGN KEYS
-ALTER TABLE raw_homicidios 
-ADD CONSTRAINT fk_homicidios_departamento 
-    FOREIGN KEY (cod_depto) 
+ALTER TABLE raw_homicidios
+ADD CONSTRAINT fk_homicidios_departamento
+    FOREIGN KEY (cod_depto)
     REFERENCES raw_divipola_departamentos(cod_dpto)
     ON DELETE RESTRICT
     ON UPDATE CASCADE;
 
-ALTER TABLE raw_homicidios 
-ADD CONSTRAINT fk_homicidios_municipio 
-    FOREIGN KEY (cod_muni) 
+ALTER TABLE raw_homicidios
+ADD CONSTRAINT fk_homicidios_municipio
+    FOREIGN KEY (cod_muni)
     REFERENCES raw_divipola_municipios(cod_mpio)
     ON DELETE RESTRICT
     ON UPDATE CASCADE;
@@ -84,7 +84,7 @@ JOIN information_schema.key_column_usage AS kcu
     ON tc.constraint_name = kcu.constraint_name
 JOIN information_schema.constraint_column_usage AS ccu
     ON ccu.constraint_name = tc.constraint_name
-WHERE tc.constraint_type = 'FOREIGN KEY' 
+WHERE tc.constraint_type = 'FOREIGN KEY'
     AND tc.table_name = 'raw_homicidios';
 ```
 
@@ -97,43 +97,43 @@ Si quieres mantener los datos actuales y solo cambiar los tipos.
 ### Paso 1: Convertir Tipos en Departamentos
 
 ```sql
-ALTER TABLE raw_divipola_departamentos 
+ALTER TABLE raw_divipola_departamentos
 ALTER COLUMN cod_dpto TYPE INTEGER USING cod_dpto::INTEGER;
 ```
 
 ### Paso 2: Convertir Tipos en Municipios
 
 ```sql
-ALTER TABLE raw_divipola_municipios 
+ALTER TABLE raw_divipola_municipios
 ALTER COLUMN cod_dpto TYPE INTEGER USING cod_dpto::INTEGER;
 
-ALTER TABLE raw_divipola_municipios 
+ALTER TABLE raw_divipola_municipios
 ALTER COLUMN cod_mpio TYPE INTEGER USING cod_mpio::INTEGER;
 ```
 
 ### Paso 3: Convertir Tipos en Homicidios
 
 ```sql
-ALTER TABLE raw_homicidios 
+ALTER TABLE raw_homicidios
 ALTER COLUMN cod_depto TYPE INTEGER USING cod_depto::INTEGER;
 
-ALTER TABLE raw_homicidios 
+ALTER TABLE raw_homicidios
 ALTER COLUMN cod_muni TYPE INTEGER USING cod_muni::INTEGER;
 ```
 
 ### Paso 4: Agregar Foreign Keys
 
 ```sql
-ALTER TABLE raw_homicidios 
-ADD CONSTRAINT fk_homicidios_departamento 
-    FOREIGN KEY (cod_depto) 
+ALTER TABLE raw_homicidios
+ADD CONSTRAINT fk_homicidios_departamento
+    FOREIGN KEY (cod_depto)
     REFERENCES raw_divipola_departamentos(cod_dpto)
     ON DELETE RESTRICT
     ON UPDATE CASCADE;
 
-ALTER TABLE raw_homicidios 
-ADD CONSTRAINT fk_homicidios_municipio 
-    FOREIGN KEY (cod_muni) 
+ALTER TABLE raw_homicidios
+ADD CONSTRAINT fk_homicidios_municipio
+    FOREIGN KEY (cod_muni)
     REFERENCES raw_divipola_municipios(cod_mpio)
     ON DELETE RESTRICT
     ON UPDATE CASCADE;
@@ -153,10 +153,10 @@ CREATE INDEX idx_homicidios_cod_muni ON raw_homicidios(cod_muni);
 ### 1. Verificar Tipos de Datos
 
 ```sql
-SELECT 
-    table_name, 
-    column_name, 
-    data_type 
+SELECT
+    table_name,
+    column_name,
+    data_type
 FROM information_schema.columns
 WHERE table_name IN ('raw_homicidios', 'raw_divipola_departamentos', 'raw_divipola_municipios')
     AND column_name IN ('cod_depto', 'cod_dpto', 'cod_muni', 'cod_mpio')
@@ -164,6 +164,7 @@ ORDER BY table_name, column_name;
 ```
 
 **Resultado esperado:**
+
 ```
 table_name                   | column_name | data_type
 -----------------------------+-------------+-----------
@@ -187,11 +188,12 @@ JOIN information_schema.key_column_usage AS kcu
     ON tc.constraint_name = kcu.constraint_name
 JOIN information_schema.constraint_column_usage AS ccu
     ON ccu.constraint_name = tc.constraint_name
-WHERE tc.constraint_type = 'FOREIGN KEY' 
+WHERE tc.constraint_type = 'FOREIGN KEY'
     AND tc.table_name = 'raw_homicidios';
 ```
 
 **Resultado esperado:**
+
 ```
 constraint_name              | column_name | foreign_table                | foreign_column
 -----------------------------+-------------+------------------------------+---------------
@@ -203,7 +205,7 @@ fk_homicidios_municipio      | cod_muni    | raw_divipola_municipios      | cod_
 
 ```sql
 -- Contar homicidios por departamento con JOIN
-SELECT 
+SELECT
     d.cod_dpto,
     d.nom_dpto,
     COUNT(h.id) as total_homicidios
@@ -221,6 +223,7 @@ LIMIT 10;
 ### ✅ Archivos Actualizados:
 
 1. **`docker/init-scripts/01-create-datalake-schema.sql`**
+
    - Cambiado `cod_depto` de `VARCHAR(2)` a `INTEGER`
    - Cambiado `cod_muni` de `VARCHAR(5)` a `INTEGER`
    - Cambiado `cod_dpto` de `VARCHAR(2)` a `INTEGER`
@@ -235,21 +238,11 @@ LIMIT 10;
 ## 🎯 Recomendación
 
 **Usa la Opción 1 (Recrear)** porque:
+
 - ✅ Más limpio y sin riesgo de errores
 - ✅ Garantiza que el schema esté 100% correcto
 - ✅ El código Python ya está actualizado
 - ✅ Solo toma ~5 minutos recargar los datos
-
----
-
-## 📝 Próximos Pasos
-
-Después de completar esta migración:
-
-1. ✅ Verificar que las foreign keys funcionen
-2. ✅ Probar queries con JOINs
-3. ✅ Configurar cron job para cargas incrementales
-4. ✅ Comenzar con el ETL del Data Warehouse
 
 ---
 
@@ -260,6 +253,7 @@ Después de completar esta migración:
 **Causa:** Hay códigos en `raw_homicidios` que no existen en las tablas DIVIPOLA.
 
 **Solución:**
+
 ```sql
 -- Encontrar códigos huérfanos
 SELECT DISTINCT h.cod_depto
@@ -273,10 +267,11 @@ WHERE d.cod_dpto IS NULL;
 **Causa:** Hay valores no numéricos en los códigos.
 
 **Solución:**
+
 ```sql
 -- Ver valores problemáticos
-SELECT DISTINCT cod_depto 
-FROM raw_homicidios 
+SELECT DISTINCT cod_depto
+FROM raw_homicidios
 WHERE cod_depto !~ '^[0-9]+$';
 ```
 

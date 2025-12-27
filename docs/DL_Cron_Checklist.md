@@ -38,6 +38,7 @@ docker-compose logs -f etl-cron
 ```
 
 **Deberías ver:**
+
 ```
 ✅ Data Lake disponible
 ✅ Sistema al día, no hay cargas pendientes
@@ -56,6 +57,7 @@ docker exec ml-homicidios-etl-cron crontab -l
 ```
 
 **Resultado esperado:**
+
 ```
 0 23 * * 5 cd /app && python scripts/load_datalake.py --incremental >> /app/logs/cron.log 2>&1
 0 8 * * * cd /app && python scripts/catchup_check.py ...
@@ -70,6 +72,7 @@ docker exec ml-homicidios-etl-cron python scripts/catchup_check.py
 ```
 
 **Resultado esperado:**
+
 ```
 ======================================================================
 VERIFICACIÓN DE CARGAS PENDIENTES
@@ -89,6 +92,7 @@ docker exec ml-homicidios-etl-cron python scripts/health_check.py
 ```
 
 **Resultado esperado:**
+
 ```
 ======================================================================
 HEALTH CHECK - SISTEMA ETL
@@ -144,6 +148,7 @@ cat logs/health.log
 ## 🎯 Comportamiento Esperado
 
 ### **Al iniciar el contenedor:**
+
 1. ✅ Verifica conexión a Data Lake
 2. ✅ Ejecuta catch-up check
 3. ✅ Si hay cargas pendientes, las ejecuta automáticamente
@@ -151,6 +156,7 @@ cat logs/health.log
 5. ✅ Queda esperando próxima ejecución programada
 
 ### **Cada viernes a las 23:00:**
+
 1. ✅ Cron ejecuta carga incremental
 2. ✅ Extrae nuevos registros desde API
 3. ✅ Inserta en Data Lake
@@ -158,11 +164,13 @@ cat logs/health.log
 5. ✅ Guarda logs en `cron.log`
 
 ### **Cada día a las 08:00:**
+
 1. ✅ Verifica si hay cargas pendientes
 2. ✅ Si detecta cargas perdidas, las ejecuta
 3. ✅ Registra en `catchup.log`
 
 ### **Cada día a las 02:00:**
+
 1. ✅ Ejecuta health check
 2. ✅ Verifica conexión y últimas cargas
 3. ✅ Registra en `health.log`
@@ -174,6 +182,7 @@ cat logs/health.log
 ### **Error: "Cannot connect to Data Lake"**
 
 **Solución:**
+
 ```bash
 # Verificar que Data Lake esté corriendo
 docker-compose ps datalake
@@ -188,6 +197,7 @@ docker-compose restart etl-cron
 ### **Error: "Cron daemon not running"**
 
 **Solución:**
+
 ```bash
 # Ver logs
 docker-compose logs etl-cron
@@ -200,6 +210,7 @@ docker-compose up -d etl-cron
 ### **Logs no se crean**
 
 **Solución:**
+
 ```bash
 # Verificar que el directorio logs existe
 mkdir -p logs
@@ -210,17 +221,6 @@ chmod 777 logs
 # Reiniciar contenedor
 docker-compose restart etl-cron
 ```
-
----
-
-## 📝 Próximos Pasos
-
-Después de verificar que todo funciona:
-
-1. ✅ Dejar el contenedor corriendo 24/7
-2. ✅ Monitorear logs semanalmente
-3. ✅ Verificar cargas cada viernes
-4. ✅ Revisar health checks periódicamente
 
 ---
 

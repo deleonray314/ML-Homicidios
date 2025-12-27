@@ -2,11 +2,11 @@
 
 ## 📋 Servicios Disponibles
 
-| Servicio | Puerto | Descripción |
-|----------|--------|-------------|
-| **Data Lake** | 5433 | PostgreSQL - Datos crudos |
-| **Data Warehouse** | 5434 | PostgreSQL - Modelo estrella |
-| **pgAdmin** | 5050 | Interfaz web de administración |
+| Servicio           | Puerto | Descripción                    |
+| ------------------ | ------ | ------------------------------ |
+| **Data Lake**      | 5433   | PostgreSQL - Datos crudos      |
+| **Data Warehouse** | 5434   | PostgreSQL - Modelo estrella   |
+| **Adminer**        | 8080   | Interfaz web de administración |
 
 ---
 
@@ -75,24 +75,6 @@ psql -h localhost -p 5433 -U datalake_user -d homicidios_datalake
 psql -h localhost -p 5434 -U dw_user -d homicidios_dw
 ```
 
-### Desde pgAdmin (interfaz web)
-
-1. Abre tu navegador: http://localhost:5050
-2. Login:
-   - Email: `admin@homicidios.local`
-   - Password: `admin123`
-3. Agregar servidor:
-   - **Data Lake**:
-     - Host: `datalake` (nombre del contenedor)
-     - Port: `5432` (puerto interno)
-     - User: `datalake_user`
-     - Password: `datalake_password_2024`
-   - **Data Warehouse**:
-     - Host: `datawarehouse`
-     - Port: `5432`
-     - User: `dw_user`
-     - Password: `dw_password_2024`
-
 ---
 
 ## 📊 Esquemas de Base de Datos
@@ -100,6 +82,7 @@ psql -h localhost -p 5434 -U dw_user -d homicidios_dw
 ### Data Lake
 
 Tablas:
+
 - `raw_homicidios` - Datos crudos de homicidios
 - `raw_divipola_departamentos` - Catálogo de departamentos
 - `raw_divipola_municipios` - Catálogo de municipios
@@ -108,6 +91,7 @@ Tablas:
 ### Data Warehouse
 
 Tablas:
+
 - `fact_homicidios` - Tabla de hechos
 - `dim_fecha` - Dimensión temporal
 - `dim_ubicacion` - Dimensión geográfica
@@ -116,6 +100,7 @@ Tablas:
 - `etl_log` - Log de ETL
 
 Vistas:
+
 - `v_homicidios_por_mes`
 - `v_homicidios_por_departamento`
 - `v_homicidios_por_sexo`
@@ -175,16 +160,19 @@ docker-compose logs datawarehouse | grep "database system is ready"
 ## 📝 Notas Importantes
 
 1. **Puertos mapeados**:
+
    - Data Lake: `5433` (host) → `5432` (container)
    - Data Warehouse: `5434` (host) → `5432` (container)
    - Esto evita conflictos con PostgreSQL local
 
 2. **Persistencia**:
+
    - Los datos se guardan en volúmenes Docker
    - Sobreviven a `docker-compose down`
    - Se eliminan solo con `docker-compose down -v`
 
 3. **Scripts de inicialización**:
+
    - Se ejecutan automáticamente al crear el contenedor
    - Solo se ejecutan la primera vez
    - Para re-ejecutar, elimina el volumen
@@ -195,11 +183,6 @@ docker-compose logs datawarehouse | grep "database system is ready"
 
 ---
 
-## 🎯 Próximos Pasos
+## 🎯 Uso
 
-Después de iniciar Docker:
-
-1. Verificar que los servicios estén corriendo
-2. Conectarse a pgAdmin y explorar las tablas
-3. Ejecutar el primer script de carga de datos
-4. Verificar que los datos se cargaron correctamente
+Después de iniciar Docker, los servicios estarán disponibles para conectarse desde aplicaciones Python o Adminer.

@@ -11,10 +11,50 @@ Este directorio contiene notebooks de Jupyter para análisis exploratorio de dat
 docker compose up -d jupyter
 ```
 
-### Acceder a la interfaz web
+### Opción 1: Acceder desde el Navegador
 
 1. Abre tu navegador en: **http://localhost:8888**
-2. **No se requiere token** (configurado para desarrollo local)
+2. Ingresa el token cuando te lo pida (ver sección "Obtener Token" abajo)
+
+### Opción 2: Conectar desde VS Code (Recomendado)
+
+#### **Paso 1: Obtener el Token de Jupyter**
+
+Ejecuta este comando en la terminal:
+
+```bash
+docker compose logs jupyter | grep "token=" | tail -1
+```
+
+Verás algo como:
+
+```
+http://127.0.0.1:8888/lab?token=9d95e744bc7bc20d013aa00f6872902024c2d394d383b362
+```
+
+El token es la parte después de `token=`
+
+#### **Paso 2: Conectar el Kernel en VS Code**
+
+1. **Abre tu notebook** (ej: `EDA.ipynb`) en VS Code
+2. **Haz clic en "Select Kernel"** (esquina superior derecha)
+3. **Selecciona "Existing Jupyter Server..."**
+4. **Ingresa la URL**: `http://localhost:8888`
+5. **Ingresa el token** que obtuviste en el Paso 1
+6. **Dale un nombre** (opcional): `Jupyter Docker`
+7. **Selecciona el kernel Python** que aparezca (Python 3.12)
+
+#### **Paso 3: Verificar Conexión**
+
+Ejecuta esta celda en tu notebook:
+
+```python
+import sys
+print(f"Python: {sys.version}")
+print(f"Ejecutando en: {sys.prefix}")
+```
+
+Deberías ver que estás usando Python 3.12 desde `/usr/local`
 
 ### Detener el servicio
 

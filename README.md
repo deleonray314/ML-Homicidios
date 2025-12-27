@@ -6,33 +6,102 @@ Sistema completo de análisis y predicción de homicidios en Colombia, implement
 
 ---
 
-## 📖 Índice de Documentación
+## � Pregunta de Investigación
+
+### **Pregunta Principal**
+
+**¿Cómo se pueden predecir los patrones temporales y geográficos de homicidios en Colombia utilizando datos históricos de la API de Datos Abiertos y técnicas de Machine Learning?**
+
+### **Objetivos**
+
+#### Objetivo General
+
+Desarrollar un sistema de análisis y predicción de homicidios en Colombia que permita identificar patrones, tendencias y factores de riesgo mediante la implementación de una arquitectura de datos moderna y modelos de Machine Learning.
+
+#### Objetivos Específicos
+
+1. **Ingesta y Almacenamiento de Datos**
+
+   - Implementar un Data Lake para almacenar datos crudos de homicidios desde la API de Datos Abiertos Colombia
+   - Automatizar la extracción incremental de datos mediante cron jobs semanales
+   - Garantizar la integridad y trazabilidad de los datos mediante logs de carga
+
+2. **Transformación y Modelado de Datos**
+
+   - Diseñar e implementar un Data Warehouse con modelo estrella para análisis eficiente
+   - Integrar datos geográficos (DIVIPOLA) para enriquecer el análisis territorial
+   - Crear dimensiones temporales, geográficas y demográficas para análisis multidimensional
+
+3. **Análisis Exploratorio**
+
+   - Identificar patrones temporales (tendencias anuales, mensuales, semanales)
+   - Analizar distribución geográfica de homicidios por departamento y municipio
+   - Caracterizar perfiles demográficos de víctimas (sexo, edad, zona)
+
+4. **Predicción y Modelado**
+
+   - Desarrollar modelos de Machine Learning para predecir homicidios futuros
+   - Identificar factores de riesgo y variables predictivas más relevantes
+   - Evaluar el desempeño de diferentes algoritmos (XGBoost, LightGBM, Prophet)
+
+5. **Visualización y Comunicación**
+   - Crear dashboards interactivos para exploración de datos
+   - Generar reportes automáticos de tendencias y alertas
+   - Facilitar la toma de decisiones basada en datos
+
+### **Alcance del Proyecto**
+
+#### Datos
+
+- **Fuente**: API de Datos Abiertos Colombia
+- **Periodo**: 2003 - 2025 (~332,000 registros)
+- **Cobertura**: 33 departamentos y 1,121 municipios de Colombia
+- **Actualización**: Semanal (viernes 23:00)
+
+#### Tecnologías
+
+- **Data Lake**: PostgreSQL (datos raw)
+- **Data Warehouse**: PostgreSQL (modelo estrella)
+- **ETL**: Python, SQLAlchemy, Pandas
+- **Orquestación**: Docker Compose, Cron
+- **Análisis**: Jupyter Lab, Python (pandas, numpy, matplotlib, seaborn)
+- **Machine Learning**: Scikit-learn, XGBoost, LightGBM, Prophet (futuro)
+
+#### Limitaciones
+
+- Los datos dependen de la disponibilidad y calidad de la API de Datos Abiertos
+- La predicción se basa en datos históricos y puede no capturar eventos extraordinarios
+- El modelo no incluye variables socioeconómicas adicionales (por ahora)
+
+---
+
+## �📖 Índice de Documentación
 
 ### **🗄️ Data Lake**
 
-| Documento | Descripción |
-|-----------|-------------|
-| [DL_ETL_Quickstart.md](DL_ETL_Quickstart.md) | Guía rápida para ejecutar el ETL del Data Lake |
-| [DL_Cron_Usage.md](DL_Cron_Usage.md) | Uso del servicio ETL con cron automático |
-| [DL_Cron_Checklist.md](DL_Cron_Checklist.md) | Checklist de implementación y verificación |
-| [DL_Loading_Strategy.md](DL_Loading_Strategy.md) | Estrategia de carga inicial e incremental |
-| [DL_Migracion_Integer.md](DL_Migracion_Integer.md) | Migración de códigos DIVIPOLA a INTEGER |
+| Documento                                          | Descripción                                    |
+| -------------------------------------------------- | ---------------------------------------------- |
+| [DL_ETL_Quickstart.md](DL_ETL_Quickstart.md)       | Guía rápida para ejecutar el ETL del Data Lake |
+| [DL_Cron_Usage.md](DL_Cron_Usage.md)               | Uso del servicio ETL con cron automático       |
+| [DL_Cron_Checklist.md](DL_Cron_Checklist.md)       | Checklist de implementación y verificación     |
+| [DL_Loading_Strategy.md](DL_Loading_Strategy.md)   | Estrategia de carga inicial e incremental      |
+| [DL_Migracion_Integer.md](DL_Migracion_Integer.md) | Migración de códigos DIVIPOLA a INTEGER        |
 
 ### **🏢 Data Warehouse**
 
-| Documento | Descripción |
-|-----------|-------------|
+| Documento                                        | Descripción                     |
+| ------------------------------------------------ | ------------------------------- |
 | [DWH_Modelo_Estrella.md](DWH_Modelo_Estrella.md) | Diagrama ER del modelo estrella |
-| [DWH_Schema_Design.md](DWH_Schema_Design.md) | Diseño detallado del schema |
-| [DWH_ETL_Quickstart.md](DWH_ETL_Quickstart.md) | Guía rápida del ETL DWH |
+| [DWH_Schema_Design.md](DWH_Schema_Design.md)     | Diseño detallado del schema     |
+| [DWH_ETL_Quickstart.md](DWH_ETL_Quickstart.md)   | Guía rápida del ETL DWH         |
 
 ### **🐳 Docker & Infraestructura**
 
-| Documento | Ubicación | Descripción |
-|-----------|-----------|-------------|
-| [QUICKSTART.md](../docker/QUICKSTART.md) | `docker/` | Inicio rápido con Docker |
-| [ADMINER_GUIDE.md](../docker/ADMINER_GUIDE.md) | `docker/` | Guía de uso de Adminer |
-| [NETWORK_ACCESS.md](../docker/NETWORK_ACCESS.md) | `docker/` | Configuración de red |
+| Documento                                        | Ubicación | Descripción              |
+| ------------------------------------------------ | --------- | ------------------------ |
+| [QUICKSTART.md](../docker/QUICKSTART.md)         | `docker/` | Inicio rápido con Docker |
+| [ADMINER_GUIDE.md](../docker/ADMINER_GUIDE.md)   | `docker/` | Guía de uso de Adminer   |
+| [NETWORK_ACCESS.md](../docker/NETWORK_ACCESS.md) | `docker/` | Configuración de red     |
 
 ---
 
@@ -133,11 +202,13 @@ docker exec ml-homicidios-etl-cron python scripts/load_datawarehouse.py --initia
 ## 📊 Datos Disponibles
 
 ### **Data Lake (Raw)**
+
 - **Homicidios**: ~332,000 registros (2003-2025)
 - **Departamentos**: 33 departamentos
 - **Municipios**: 1,121 municipios
 
 ### **Data Warehouse (Transformado)**
+
 - **Dimensión Temporal**: 8,340 fechas
 - **Dimensión Geográfica**: 33 departamentos + 1,121 municipios
 - **Dimensión Demográfica**: 6 categorías de sexo
@@ -149,13 +220,13 @@ docker exec ml-homicidios-etl-cron python scripts/load_datawarehouse.py --initia
 
 ### **Cron Jobs Configurados**
 
-| Proceso | Frecuencia | Hora | Log |
-|---------|------------|------|-----|
-| Carga Data Lake | Viernes | 23:00 | `/app/logs/cron.log` |
-| Carga Data Warehouse | Sábado | 01:00 | `/app/logs/cron_dwh.log` |
-| Catch-up Data Lake | Diario | 08:00 | `/app/logs/catchup.log` |
-| Catch-up DWH | Diario | 09:00 | `/app/logs/catchup_dwh.log` |
-| Health Check | Diario | 02:00 | `/app/logs/health.log` |
+| Proceso              | Frecuencia | Hora  | Log                         |
+| -------------------- | ---------- | ----- | --------------------------- |
+| Carga Data Lake      | Viernes    | 23:00 | `/app/logs/cron.log`        |
+| Carga Data Warehouse | Sábado     | 01:00 | `/app/logs/cron_dwh.log`    |
+| Catch-up Data Lake   | Diario     | 08:00 | `/app/logs/catchup.log`     |
+| Catch-up DWH         | Diario     | 09:00 | `/app/logs/catchup_dwh.log` |
+| Health Check         | Diario     | 02:00 | `/app/logs/health.log`      |
 
 ### **Monitoreo**
 
@@ -356,24 +427,10 @@ docker exec ml-homicidios-etl-cron tail -f /app/logs/cron.log
 ## 📞 Soporte
 
 Para más información, consulta la documentación específica en la carpeta `docs/`:
+
 - **Data Lake**: Archivos con prefijo `DL_`
 - **Data Warehouse**: Archivos con prefijo `DWH_`
 - **Docker**: Carpeta `docker/`
-
----
-
-## ✅ Checklist de Implementación
-
-- [x] Docker Compose configurado
-- [x] Data Lake schema creado
-- [x] Data Warehouse schema creado
-- [x] ETL Data Lake implementado
-- [x] ETL Data Warehouse implementado
-- [x] Cron jobs configurados
-- [x] Catch-up automático implementado
-- [x] Health checks configurados
-- [x] Documentación completa
-- [x] Vistas analíticas creadas
 
 ---
 
