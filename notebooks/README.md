@@ -13,38 +13,34 @@ docker compose up -d jupyter
 
 ### Opción 1: Acceder desde el Navegador
 
-1. Abre tu navegador en: **http://localhost:8888**
-2. Ingresa el token cuando te lo pida (ver sección "Obtener Token" abajo)
+1. Abre tu navegador en: **http://localhost:8888/lab**
+2. Ingresa la contraseña: `ML-Homicidios2003!`
+3. ¡Listo! Ya puedes trabajar en Jupyter Lab desde el navegador
 
 ### Opción 2: Conectar desde VS Code (Recomendado)
 
-#### **Paso 1: Obtener el Token de Jupyter**
-
-Ejecuta este comando en la terminal:
-
-```bash
-docker compose logs jupyter | grep "token=" | tail -1
-```
-
-Verás algo como:
-
-```
-http://127.0.0.1:8888/lab?token=9d95e744bc7bc20d013aa00f6872902024c2d394d383b362
-```
-
-El token es la parte después de `token=`
-
-#### **Paso 2: Conectar el Kernel en VS Code**
+#### **Método 1: Autenticación directa (puede requerir navegador primero)**
 
 1. **Abre tu notebook** (ej: `EDA.ipynb`) en VS Code
 2. **Haz clic en "Select Kernel"** (esquina superior derecha)
 3. **Selecciona "Existing Jupyter Server..."**
-4. **Ingresa la URL**: `http://localhost:8888`
-5. **Ingresa el token** que obtuviste en el Paso 1
-6. **Dale un nombre** (opcional): `Jupyter Docker`
-7. **Selecciona el kernel Python** que aparezca (Python 3.12)
+4. **Ingresa la URL**: `http://localhost:8888/lab`
+5. **Ingresa la contraseña**: `ML-Homicidios2003!`
+6. **Selecciona el kernel Python** que aparezca (Python 3.12)
 
-#### **Paso 3: Verificar Conexión**
+> **Nota:** Si VS Code no acepta la contraseña directamente, usa el Método 2.
+
+#### **Método 2: Conexión después de autenticarte en navegador (más confiable)**
+
+1. **Primero, abre Jupyter en el navegador**: http://localhost:8888/lab
+2. **Ingresa la contraseña**: `ML-Homicidios2003!`
+3. **Copia la URL completa** de la barra de direcciones del navegador
+4. **En VS Code**, haz clic en "Select Kernel"
+5. **Selecciona "Existing Jupyter Server..."**
+6. **Pega la URL completa** que copiaste del navegador
+7. **Selecciona el kernel Python 3.12**
+
+#### **Verificar Conexión**
 
 Ejecuta esta celda en tu notebook:
 
@@ -111,9 +107,16 @@ engine_dl = create_engine(connection_string)
 
 ---
 
-## 📝 Credenciales
+## 🔑 Credenciales de Acceso
 
-Las credenciales se cargan automáticamente desde el archivo `.env` montado en `/app/.env`.
+### Jupyter Lab
+
+- **URL**: http://localhost:8888/lab
+- **Contraseña**: `ML-Homicidios2003!`
+
+### Bases de Datos
+
+Las credenciales de las bases de datos se cargan automáticamente desde el archivo `.env` montado en `/app/.env`.
 
 **Variables disponibles:**
 
@@ -189,3 +192,17 @@ print(schema)
 
 - Verifica que el contenedor esté corriendo: `docker compose ps`
 - Revisa los logs: `docker compose logs jupyter`
+
+**La contraseña no funciona en VS Code**
+
+- **Solución recomendada**: Usa el Método 2 (autentícate primero en el navegador)
+  1. Abre http://localhost:8888/lab en tu navegador
+  2. Ingresa la contraseña: `ML-Homicidios2003!`
+  3. Copia la URL completa del navegador
+  4. Usa esa URL en VS Code para conectarte
+
+**La contraseña no funciona en el navegador**
+
+- Asegúrate de usar: `ML-Homicidios2003!` (con mayúsculas y signos exactos)
+- Si cambiaste la contraseña, reinicia el contenedor: `docker compose restart jupyter`
+- Verifica que el contenedor esté corriendo: `docker compose ps`

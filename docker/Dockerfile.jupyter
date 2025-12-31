@@ -45,6 +45,12 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # Crear directorio para notebooks
 RUN mkdir -p /app/notebooks
 
+# Copiar script de configuración de contraseña
+COPY docker/configure_jupyter_password.py /tmp/configure_jupyter_password.py
+
+# Ejecutar script de configuración
+RUN python /tmp/configure_jupyter_password.py && rm /tmp/configure_jupyter_password.py
+
 # Exponer puerto de Jupyter
 EXPOSE 8888
 

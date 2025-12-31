@@ -75,33 +75,39 @@ Desarrollar un sistema de análisis y predicción de homicidios en Colombia que 
 
 ---
 
-## �📖 Índice de Documentación
+## 📖 Índice de Documentación
 
 ### **🗄️ Data Lake**
 
-| Documento                                          | Descripción                                    |
-| -------------------------------------------------- | ---------------------------------------------- |
-| [DL_ETL_Quickstart.md](DL_ETL_Quickstart.md)       | Guía rápida para ejecutar el ETL del Data Lake |
-| [DL_Cron_Usage.md](DL_Cron_Usage.md)               | Uso del servicio ETL con cron automático       |
-| [DL_Cron_Checklist.md](DL_Cron_Checklist.md)       | Checklist de implementación y verificación     |
-| [DL_Loading_Strategy.md](DL_Loading_Strategy.md)   | Estrategia de carga inicial e incremental      |
-| [DL_Migracion_Integer.md](DL_Migracion_Integer.md) | Migración de códigos DIVIPOLA a INTEGER        |
+| Documento                                               | Descripción                                    |
+| ------------------------------------------------------- | ---------------------------------------------- |
+| [DL_ETL_Quickstart.md](docs/DL_ETL_Quickstart.md)       | Guía rápida para ejecutar el ETL del Data Lake |
+| [DL_Cron_Usage.md](docs/DL_Cron_Usage.md)               | Uso del servicio ETL con cron automático       |
+| [DL_Cron_Checklist.md](docs/DL_Cron_Checklist.md)       | Checklist de implementación y verificación     |
+| [DL_Loading_Strategy.md](docs/DL_Loading_Strategy.md)   | Estrategia de carga inicial e incremental      |
+| [DL_Migracion_Integer.md](docs/DL_Migracion_Integer.md) | Migración de códigos DIVIPOLA a INTEGER        |
 
 ### **🏢 Data Warehouse**
 
-| Documento                                        | Descripción                     |
-| ------------------------------------------------ | ------------------------------- |
-| [DWH_Modelo_Estrella.md](DWH_Modelo_Estrella.md) | Diagrama ER del modelo estrella |
-| [DWH_Schema_Design.md](DWH_Schema_Design.md)     | Diseño detallado del schema     |
-| [DWH_ETL_Quickstart.md](DWH_ETL_Quickstart.md)   | Guía rápida del ETL DWH         |
+| Documento                                             | Descripción                     |
+| ----------------------------------------------------- | ------------------------------- |
+| [DWH_Modelo_Estrella.md](docs/DWH_Modelo_Estrella.md) | Diagrama ER del modelo estrella |
+| [DWH_Schema_Design.md](docs/DWH_Schema_Design.md)     | Diseño detallado del schema     |
+| [DWH_ETL_Quickstart.md](docs/DWH_ETL_Quickstart.md)   | Guía rápida del ETL DWH         |
 
 ### **🐳 Docker & Infraestructura**
 
-| Documento                                        | Ubicación | Descripción              |
-| ------------------------------------------------ | --------- | ------------------------ |
-| [QUICKSTART.md](../docker/QUICKSTART.md)         | `docker/` | Inicio rápido con Docker |
-| [ADMINER_GUIDE.md](../docker/ADMINER_GUIDE.md)   | `docker/` | Guía de uso de Adminer   |
-| [NETWORK_ACCESS.md](../docker/NETWORK_ACCESS.md) | `docker/` | Configuración de red     |
+| Documento                                     | Ubicación | Descripción              |
+| --------------------------------------------- | --------- | ------------------------ |
+| [QUICKSTART.md](docker/QUICKSTART.md)         | `docker/` | Inicio rápido con Docker |
+| [ADMINER_GUIDE.md](docker/ADMINER_GUIDE.md)   | `docker/` | Guía de uso de Adminer   |
+| [NETWORK_ACCESS.md](docker/NETWORK_ACCESS.md) | `docker/` | Configuración de red     |
+
+### **📊 Jupyter Lab & Notebooks**
+
+| Documento                        | Ubicación    | Descripción                |
+| -------------------------------- | ------------ | -------------------------- |
+| [README.md](notebooks/README.md) | `notebooks/` | Guía de uso de Jupyter Lab |
 
 ---
 

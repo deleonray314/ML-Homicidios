@@ -26,7 +26,11 @@ services:
       - ml-homicidios-network
 
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${DATALAKE_USER:-datalake_user} -d ${DATALAKE_DB:-homicidios_datalake}" ]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${DATALAKE_USER:-datalake_user} -d ${DATALAKE_DB:-homicidios_datalake}",
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -56,7 +60,11 @@ services:
       - ml-homicidios-network
 
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${DW_USER:-dw_user} -d ${DW_DB:-homicidios_dw}" ]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${DW_USER:-dw_user} -d ${DW_DB:-homicidios_dw}",
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -99,7 +107,6 @@ services:
 
     environment:
       - JUPYTER_ENABLE_LAB=yes
-      - JUPYTER_TOKEN=
       - TZ=America/Bogota
 
     volumes:
@@ -153,7 +160,7 @@ services:
         condition: service_healthy
 
     healthcheck:
-      test: [ "CMD", "pgrep", "crond" ]
+      test: ["CMD", "pgrep", "crond"]
       interval: 30s
       timeout: 10s
       retries: 3
