@@ -203,6 +203,18 @@ docker exec ml-homicidios-etl-cron python scripts/load_datawarehouse.py --initia
 # Servidor: datawarehouse | Usuario: dw_user | Password: dw_password_2024
 ```
 
+### **4. Operación Diaria (Recomendado)**
+
+Para el trabajo diario, usa estos comandos para no reconstruir los contenedores cada vez:
+
+```bash
+# Pausar servicios (Apagar sin destruir)
+docker compose stop
+
+# Reanudar servicios (Encender rápido)
+docker compose start
+```
+
 ---
 
 ## 📊 Datos Disponibles
